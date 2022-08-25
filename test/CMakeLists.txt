@@ -27,8 +27,14 @@ if(HAS_CUDA)
 endif()
 
 if(HAS_MKL)
-target_include_directories(unitest PRIVATE "${MKLROOT}/include")    
+target_include_directories(unitest PRIVATE "${MKLROOT}/include")
 target_link_directories(unitest PRIVATE "${MKLROOT}/lib/intel64")
+target_link_libraries(unitest
+                      PRIVATE
+                      mkl_intel_lp64
+                      mkl_core
+                      mkl_gnu_thread
+                     )
 endif()
 
 

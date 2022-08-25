@@ -1,10 +1,11 @@
+#pragma once
 #include <fstream>
 #include <cstdio>
 
 namespace CPRA{
 
-template<typename T>
-bool CpraInterface<T>::ReadMatrixFromFile(std::string FileName, T* flat_data_ptr, size_t m, size_t n, size_t l)
+template<typename T, IMPL_TYPE type>
+bool Cpra<T, type>::ReadMatrixFromFile(std::string FileName, T* flat_data_ptr, size_t m, size_t n, size_t l)
 {
     if(!std::filesystem::exists(FileName))
     {
@@ -25,8 +26,8 @@ bool CpraInterface<T>::ReadMatrixFromFile(std::string FileName, T* flat_data_ptr
     return true;
 }
 
-template<typename T>
-bool CpraInterface<T>::WriteMatrixToFile(std::string FileName, T* flat_data_ptr, size_t m, size_t n, size_t l)
+template<typename T, IMPL_TYPE type>
+bool Cpra<T, type>::WriteMatrixToFile(std::string FileName, T* flat_data_ptr, size_t m, size_t n, size_t l)
 {
     if(std::filesystem::exists(FileName))
     {
