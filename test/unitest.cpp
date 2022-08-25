@@ -5,9 +5,12 @@
 TEST(CUDATEST, Test_Initialize)
 {
     CPRA::CudaCpra<float> obj;
-    auto test_ptr = obj.Initialize(10, 10, 10);
+    float* test_ptr;
+    cudaMallocManaged((void**) & test_ptr, sizeof(float) * 1000);
+    obj.Initialize(test_ptr, 10, 10, 10);
     for(int i = 0; i < 1000; i++)
         EXPECT_TRUE((test_ptr[i] >= 0) && (test_ptr[i] <= 1));
+    cudaFree(test_ptr);
 }
 
 TEST(CUDATEST, Test_IO_Host_BINARY)
@@ -24,6 +27,9 @@ TEST(CUDATEST, Test_IO_Host_BINARY)
     EXPECT_EQ(obj.ReadMatrixFromFile("/tmp/test_output.bin", Input_ptr, 10, 10, 10), true);
     for(int i = 0; i < 1000; i++)
         EXPECT_EQ(Input_ptr[i], i);
+
+    cudaFree(output_ptr);
+    cudaFree(Input_ptr);
 }
 
 #endif

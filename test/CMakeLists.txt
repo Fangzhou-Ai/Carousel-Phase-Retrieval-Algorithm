@@ -8,20 +8,18 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-enable_testing()
-
 add_executable(
-    temp_test
-    temp_test.cpp
+    unitest
+    unitest.cpp
 )
 target_link_libraries(
-    temp_test PUBLIC
+    unitest PUBLIC
     GTest::gtest_main
 )
 
 if(HAS_CUDA)
     target_link_libraries(
-        temp_test 
+        unitest 
         PRIVATE 
         CUDA::cudart  
         CUDA::curand
@@ -29,11 +27,11 @@ if(HAS_CUDA)
 endif()
 
 if(HAS_MKL)
-target_include_directories(temp_test PRIVATE "${MKLROOT}/include")    
-target_link_directories(temp_test PRIVATE "${MKLROOT}/lib/intel64")
+target_include_directories(unitest PRIVATE "${MKLROOT}/include")    
+target_link_directories(unitest PRIVATE "${MKLROOT}/lib/intel64")
 endif()
 
 
 include(GoogleTest)
 
-gtest_discover_tests(temp_test)
+gtest_discover_tests(unitest)

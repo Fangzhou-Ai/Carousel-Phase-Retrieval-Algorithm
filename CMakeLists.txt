@@ -41,5 +41,6 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 
 if(BUILD_TEST)
+    enable_testing()
     add_subdirectory(${CMAKE_SOURCE_DIR}/test)
 endif()

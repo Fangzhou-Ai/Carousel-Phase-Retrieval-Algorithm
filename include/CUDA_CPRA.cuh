@@ -11,7 +11,7 @@ class CudaCpra final : public CpraInterface<T>
         CudaCpra(){}
 
         // Initialize
-        virtual T* Initialize(size_t m, size_t n, size_t l) override;
+        virtual bool Initialize(T* flat_data_ptr, size_t m, size_t n, size_t l) override;
         // Reconstruction
         virtual bool PreReconstruct(size_t iter_num, size_t batch_size = 1) override;
         virtual bool Reconstruct(size_t epi, size_t iter_per_epi, size_t batch_size = 1) override;
