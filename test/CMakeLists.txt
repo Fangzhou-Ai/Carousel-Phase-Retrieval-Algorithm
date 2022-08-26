@@ -38,6 +38,10 @@ target_link_libraries(unitest
 endif()
 
 
+if(HAS_OMP)
+target_link_libraries(unitest PRIVATE OpenMP::OpenMP_CXX)
+endif()
+
 include(GoogleTest)
 
 gtest_discover_tests(unitest)
