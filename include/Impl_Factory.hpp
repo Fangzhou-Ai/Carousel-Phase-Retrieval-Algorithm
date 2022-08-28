@@ -11,18 +11,18 @@
 namespace CPRA{
 
 template <typename T>
-std::unique_ptr<CpraImpl<T>> NewCpraImpl(IMPL_TYPE type)
+std::unique_ptr<CpraImpl<T>> NewCpraImpl(IMPL_TYPE type, size_t m, size_t n, size_t l, size_t batch_size)
 {
     switch(type)
     {
 #ifdef HAS_CUDA
         case IMPL_TYPE::CUDA:
-            return NewCUDAImpl<T>();
+            return NewCUDAImpl<T>(m, n, l, batch_size);
             break;
 #endif
 #ifdef HAS_MKL
         case IMPL_TYPE::MKL:
-            return NewMKLImpl<T>();
+            return NewMKLImpl<T>(m, n, l, batch_size);
             break;
 #endif
         default:

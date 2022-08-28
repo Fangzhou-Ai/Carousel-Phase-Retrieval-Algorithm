@@ -29,33 +29,46 @@ bool MklImpl<T>::Initialize(T* flat_data_ptr, size_t num)
 }
 
 template<typename T>
-bool MklImpl<T>::MergeAddData(T* flat_src, T* flat_dst, T alpha, size_t num)
+bool MklImpl<T>::MergeAddData(std::complex<T>* flat_src, std::complex<T>* flat_dst, T alpha, size_t num)
 {
-    if(alpha == 0) return true;
-#ifdef HAS_OMP
-#pragma omp parallel for
-#endif
-    for(size_t i = 0; i < num; i++)
+    if(alpha == 0 || num == 0) return false;
+    std::complex<T> _a;
+    std::complex<T> _b;
+    _a.real(alpha);
+    _a.imag(0);
+    _b.real(1);
+    _b.imag(0);
+    if constexpr(std::is_same_v<T, float>)
     {
-        flat_dst[i] += alpha * flat_src[i];
+        cblas_caxpby(num, &_a, flat_src, 1, &_b, flat_dst, 1);
     }
+    else
+    {
+        cblas_zaxpby(num, &_a, flat_src, 1, &_b, flat_dst, 1);
+    }
+    return true;
 }
 
 template<typename T>
-bool MklImpl<T>::Normalization(T* flat_src, T norm, size_t num)
+bool MklImpl<T>::Normalization(std::complex<T>* flat_src, T norm, size_t num)
 {
-    if(norm == 0) return false;
-#ifdef HAS_OMP
-#pragma omp parallel for
-#endif
-    for(size_t i = 0; i < num; i++)
+    if(norm == 0 || num == 0) return false;
+    std::complex<T> a;
+    a.real(1.0 / norm);
+    a.imag(0);
+    if constexpr(std::is_same_v<T, float>)
     {
-        flat_src[i] /= norm;
+        cblas_cscal(num, &a, flat_src, 1);
     }
+    else
+    {
+        cblas_zscal(num, &a, flat_src, 1);
+    }
+    return true;
 }
 
 template<typename T>
-bool MklImpl<T>::SpaceConstraint(T* flat_src_data, bool* flat_constr_data, size_t num, size_t batch_size)
+bool MklImpl<T>::SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, size_t num, size_t batch_size)
 {
     if(num == 0 || batch_size == 0) return false;
 #ifdef HAS_OMP
@@ -63,9 +76,11 @@ bool MklImpl<T>::SpaceConstraint(T* flat_src_data, bool* flat_constr_data, size_
 #endif
     for(size_t i = 0; i < num; i++)
     {
-        if(!flat_constr_data[i % (num / batch_size)])
-            flat_src_data[i] = 0; 
+        flat_src_data[i].imag(0);
+        if(flat_constr_data[i % (num / batch_size)] == 0)
+            flat_src_data[i].real(0);
     }
+    return true;
 }
 
 template<typename T>
@@ -89,6 +104,7 @@ bool MklImpl<T>::RealDataConstraint(std::complex<T>* flat_src_data, T* flat_cons
         else
             flat_src_data[i] = std::polar(flat_constr_data[i % (num / batch_size)], std::arg(flat_src_data[i]));
     }
+    return true;
 }
 
 template<typename T>
@@ -111,8 +127,36 @@ bool MklImpl<T>::ComplexDataConstraint(std::complex<T>* flat_src_data, std::comp
         else
             flat_src_data[i] = flat_constr_data[i % (num / batch_size)];
     }
+    return true;
 }
 
+template<typename T>
+bool MklImpl<T>::Forward2D(std::complex<T>* flat_input)
+{ 
+    status = DftiComputeForward(Dfti2DHandle_, flat_input);
+    return true;
+}
+
+template<typename T>
+bool MklImpl<T>::Backward2D(std::complex<T>* flat_input)
+{
+    status = DftiComputeBackward(Dfti2DHandle_, flat_input);
+    return true;
+}
+
+template<typename T>
+bool MklImpl<T>::Forward3D(std::complex<T>* flat_input)
+{
+    status = DftiComputeForward(Dfti3DHandle_, flat_input);
+    return true;
+}
+
+template<typename T>
+bool MklImpl<T>::Backward3D(std::complex<T>* flat_input)
+{
+    status = DftiComputeBackward(Dfti3DHandle_, flat_input);
+    return true;
+}
 
 
 } // namespace CPRA
