@@ -33,20 +33,18 @@ TEST(MKLTEST, Test_MKL_Initialize)
 TEST(CPRATEST, Test_IO_Host_BINARY)
 {
     CPRA::Cpra<float, CPRA::IMPL_TYPE::CUDA> obj(1, 1, 1, 1);
-    float* output_ptr;
-    cudaMallocManaged((void**) & output_ptr, sizeof(float) * 1000);
+    float* output_ptr = (float*)obj.allocate(sizeof(float) * 1000);
     for(int i = 0; i < 1000; i++)
         output_ptr[i] = i;
     EXPECT_EQ(obj.WriteMatrixToFile("/tmp/test_output.bin", output_ptr, 10, 10, 10), true);
 
-    float* Input_ptr;
-    cudaMallocManaged((void**) & Input_ptr, sizeof(float) * 1000);
+    float* Input_ptr = (float*)obj.allocate(sizeof(float) * 1000);
     EXPECT_EQ(obj.ReadMatrixFromFile("/tmp/test_output.bin", Input_ptr, 10, 10, 10), true);
     for(int i = 0; i < 1000; i++)
         EXPECT_EQ(Input_ptr[i], i);
 
-    cudaFree(output_ptr);
-    cudaFree(Input_ptr);
+    obj.deallocate(output_ptr);
+    obj.deallocate(Input_ptr);
 }
 
 TEST(MKLTEST, Test_Norm_Merge)
@@ -58,14 +56,14 @@ TEST(MKLTEST, Test_Norm_Merge)
         input[i].real(10);
         input[i].imag(10);
     }
-    obj->MergeAddData(input, input, 1, 1000);
+    obj->MergeAddData(input, input, 0.5, 0.5, 1000);
     for(auto i = 0; i < 1000; i++)
     {
-        EXPECT_EQ(input[i].real(), 20); 
-        EXPECT_EQ(input[i].imag(), 20);   
+        EXPECT_EQ(input[i].real(), 10); 
+        EXPECT_EQ(input[i].imag(), 10);   
     }
     
-    obj->Normalization(input, 20, 1000);
+    obj->Normalization(input, 10, 1000);
     for(auto i = 0; i < 1000; i++)
     {
         EXPECT_EQ(input[i].real(), 1); 

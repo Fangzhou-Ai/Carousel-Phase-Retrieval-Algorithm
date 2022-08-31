@@ -23,4 +23,10 @@ bool CudaImpl<T>::Initialize(T* flat_data_ptr, size_t num)
     return true;
 }
 
+template<typename T>
+bool CudaImpl<T>::Forward2D(thrust::complex<T>* flat_input, cudaStream_t stream)
+{
+    return true;
+}
+
 }

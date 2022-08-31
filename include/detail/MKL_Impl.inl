@@ -29,14 +29,14 @@ bool MklImpl<T>::Initialize(T* flat_data_ptr, size_t num)
 }
 
 template<typename T>
-bool MklImpl<T>::MergeAddData(std::complex<T>* flat_src, std::complex<T>* flat_dst, T alpha, size_t num)
+bool MklImpl<T>::MergeAddData(std::complex<T>* flat_src, std::complex<T>* flat_dst, T alpha, T beta, size_t num)
 {
     if(alpha == 0 || num == 0) return false;
     std::complex<T> _a;
     std::complex<T> _b;
     _a.real(alpha);
     _a.imag(0);
-    _b.real(1);
+    _b.real(beta);
     _b.imag(0);
     if constexpr(std::is_same_v<T, float>)
     {

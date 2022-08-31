@@ -26,7 +26,7 @@ std::unique_ptr<CpraImpl<T>> NewCpraImpl(IMPL_TYPE type, size_t m, size_t n, siz
             break;
 #endif
         default:
-            throw std::invalid_argument("Wroong impl type! Only support CUDA and MKL for now.");
+            throw std::invalid_argument("Wrong impl type! Only support CUDA and MKL for now.");
     }
 }
 
