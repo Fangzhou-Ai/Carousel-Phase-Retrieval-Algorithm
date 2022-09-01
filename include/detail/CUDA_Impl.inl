@@ -89,8 +89,55 @@ bool CudaImpl<T>::SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr
     int grid_size = (num + per_block_data - 1) / per_block_data;
     Kernel::ker_SpaceConstraint<T><<<grid_size, block_size, 0, stream_>>>
     ((thrust::complex<T>*)flat_src_data, flat_constr_data, num, batch_size);
+    return true;
 }
 
+template<typename T>
+bool CudaImpl<T>::RealDataConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, size_t num, size_t batch_size)
+{
+    int block_size = 256;
+    int per_thread_data = 8;
+    int per_block_data = block_size * per_thread_data;
+    int grid_size = (num + per_block_data - 1) / per_block_data;
+    Kernel::ker_RealDataConstraint<T><<<grid_size, block_size, 0, stream_>>>
+    ((thrust::complex<T>*)flat_src_data, flat_constr_data, num, batch_size);
+    return true;
+}
 
+template<typename T>
+bool CudaImpl<T>::ComplexDataConstraint(std::complex<T>* flat_src_data, std::complex<T>* flat_constr_data, size_t num, size_t batch_size)
+{
+    int block_size = 256;
+    int per_thread_data = 8;
+    int per_block_data = block_size * per_thread_data;
+    int grid_size = (num + per_block_data - 1) / per_block_data;
+    Kernel::ker_ComplexDataConstraint<T><<<grid_size, block_size, 0, stream_>>>
+    ((thrust::complex<T>*)flat_src_data, (thrust::complex<T>*)flat_constr_data, num, batch_size);
+    return true;
+}
+
+template<typename T>
+bool CudaImpl<T>::MergeAddData(std::complex<T>* flat_src, std::complex<T>* flat_dst, T alpha, T beta, size_t num)
+{
+    int block_size = 256;
+    int per_thread_data = 8;
+    int per_block_data = block_size * per_thread_data;
+    int grid_size = (num + per_block_data - 1) / per_block_data;
+    Kernel::ker_MergeAddData<T><<<grid_size, block_size, 0, stream_>>>
+    ((thrust::complex<T>*)flat_src, (thrust::complex<T>*)flat_dst, alpha, beta, num);
+    return true;
+}
+
+template<typename T>
+bool CudaImpl<T>::Normalization(std::complex<T>* flat_src, T norm, size_t num)
+{
+    int block_size = 256;
+    int per_thread_data = 8;
+    int per_block_data = block_size * per_thread_data;
+    int grid_size = (num + per_block_data - 1) / per_block_data;
+    Kernel::ker_Normalization<T><<<grid_size, block_size, 0, stream_>>>
+    ((thrust::complex<T>*)flat_src, norm, num);
+    return true;
+}
 
 }

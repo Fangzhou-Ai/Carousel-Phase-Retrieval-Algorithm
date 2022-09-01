@@ -12,7 +12,7 @@ TEST(MKLTEST, Test_MKL_Initialize)
 
 
 
-TEST(CPRATEST, Test_IO_Host_BINARY)
+TEST(MKLTEST, Test_IO_Host_BINARY)
 {
     CPRA::Cpra<float, CPRA::IMPL_TYPE::MKL> obj(1, 1, 1, 1);
     float* output_ptr = (float*)obj.allocate(sizeof(float) * 1000);

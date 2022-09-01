@@ -56,16 +56,16 @@ class CudaImpl final : public CpraImpl<T>
 
         bool SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, size_t num, size_t batch_size) override;
 
-        bool RealDataConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, size_t num, size_t batch_size) override {};
+        bool RealDataConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, size_t num, size_t batch_size) override;
 
-        bool ComplexDataConstraint(std::complex<T>* flat_src_data, std::complex<T>* flat_constr_data, size_t num, size_t batch_size) override {};
+        bool ComplexDataConstraint(std::complex<T>* flat_src_data, std::complex<T>* flat_constr_data, size_t num, size_t batch_size) override;
 
         // Add src to dst
         // flat_dst = alpha * flat_src + flat_dst 
-        bool MergeAddData(std::complex<T>* flat_src, std::complex<T>* flat_dst, T alpha, T beta, size_t num) override {};
+        bool MergeAddData(std::complex<T>* flat_src, std::complex<T>* flat_dst, T alpha, T beta, size_t num) override;
 
         // flat_src = flat_src ./ norm
-        bool Normalization(std::complex<T>* flat_src, T norm, size_t num) override {};
+        bool Normalization(std::complex<T>* flat_src, T norm, size_t num) override;
         // Only support one rotating angle for now
         // param:
         // p : number of 2D sources
