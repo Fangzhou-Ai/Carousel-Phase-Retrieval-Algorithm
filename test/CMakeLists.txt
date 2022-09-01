@@ -7,41 +7,48 @@ FetchContent_Declare(
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
-
-add_executable(
-    unitest
-    unitest.cpp
-)
-target_link_libraries(
-    unitest PUBLIC
-    GTest::gtest_main
-)
+include(GoogleTest)
 
 if(HAS_CUDA)
+    add_executable(
+        unitest_cuda
+        unitest_cuda.cu
+    )
     target_link_libraries(
-        unitest 
+        unitest_cuda PUBLIC
+        GTest::gtest_main
+    )
+    target_link_libraries(
+        unitest_cuda 
         PRIVATE 
         CUDA::cudart  
         CUDA::curand
+        CUDA::cufft
     )
+    gtest_discover_tests(unitest_cuda)
 endif()
 
 if(HAS_MKL)
-target_include_directories(unitest PRIVATE "${MKLROOT}/include")
-target_link_directories(unitest PRIVATE "${MKLROOT}/lib/intel64")
-target_link_libraries(unitest
-                      PRIVATE
-                      mkl_intel_lp64
-                      mkl_core
-                      mkl_gnu_thread
-                     )
+    add_executable(
+        unitest_mkl
+        unitest_mkl.cpp
+    )
+    target_link_libraries(
+        unitest_mkl PUBLIC
+        GTest::gtest_main
+    )
+    
+    if(HAS_OMP)
+        target_link_libraries(unitest_mkl PRIVATE OpenMP::OpenMP_CXX_LIBRARIES)
+    endif()
+
+    target_include_directories(unitest_mkl PRIVATE "${MKLROOT}/include")
+    target_link_directories(unitest_mkl PRIVATE "${MKLROOT}/lib/intel64")
+    target_link_libraries(unitest_mkl
+                            PRIVATE
+                            mkl_intel_lp64
+                            mkl_core
+                            mkl_gnu_thread
+                        )
+    gtest_discover_tests(unitest_mkl)
 endif()
-
-
-if(HAS_OMP)
-target_link_libraries(unitest PRIVATE OpenMP::OpenMP_CXX)
-endif()
-
-include(GoogleTest)
-
-gtest_discover_tests(unitest)

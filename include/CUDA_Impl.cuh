@@ -2,7 +2,8 @@
 #ifdef HAS_CUDA
 #include "CPRA_Impl.hpp"
 #include "CUDA_Error_Check.hpp"
-
+#include <cufft.h>
+#include <thrust/complex.h>
 namespace CPRA
 {
 template <typename T>
@@ -10,50 +11,50 @@ class CudaImpl final : public CpraImpl<T>
 {
     public:
         CudaImpl() = default;
-        CudaImpl(size_t m, size_t n, size_t l, size_t batch_size){}
+        CudaImpl(size_t m, size_t n, size_t l, size_t batch_size)
+        {
+            int Dim2D[2] = {m, n};
+            int Dim3D[3] = {m, n, l};
+            if constexpr (std::is_same_v<T, float>)
+            {
+                cufftPlanMany(&Dfti2DHandle_, 2, Dim2D,
+                    NULL, 1, 0,
+                    NULL, 1, 0,
+                    CUFFT_C2C, batch_size);
+                cufftPlanMany(&Dfti3DHandle_, 3, Dim3D,
+                    NULL, 1, 0,
+                    NULL, 1, 0,
+                    CUFFT_C2C, batch_size);
+            }
+            else
+            {
+                cufftPlanMany(&Dfti2DHandle_, 2, Dim2D,
+                    NULL, 1, 0,
+                    NULL, 1, 0,
+                    CUFFT_Z2Z, batch_size);
+                cufftPlanMany(&Dfti3DHandle_, 3, Dim3D,
+                    NULL, 1, 0,
+                    NULL, 1, 0,
+                    CUFFT_Z2Z, batch_size);
+            }
+            cudaStreamCreate(&stream_);
+            cufftSetStream(Dfti2DHandle_, stream_);
+            cufftSetStream(Dfti3DHandle_, stream_);
+        }
 
         // Initialize
         bool Initialize(T* flat_data_ptr, size_t num) override;
 
         // CUDA version with cuda stream here
-        bool Forward2D(thrust::complex<T>* flat_input, cudaStream_t stream) override;
+        bool Forward2D(std::complex<T>* flat_input) override;
 
-        bool Backward2D(thrust::complex<T>* flat_input, cudaStream_t stream) override {};
+        bool Backward2D(std::complex<T>* flat_input) override;
 
-        bool Forward3D(thrust::complex<T>* flat_input, cudaStream_t stream) override {};
+        bool Forward3D(std::complex<T>* flat_input) override;
 
-        bool Backward3D(thrust::complex<T>* flat_input, cudaStream_t stream) override {};
+        bool Backward3D(std::complex<T>* flat_input) override;
 
-        bool SpaceConstraint(thrust::complex<T>* flat_src_data, T* flat_constr_data, size_t num, size_t batch_size, cudaStream_t stream) override {};
-
-        bool RealDataConstraint(thrust::complex<T>* flat_src_data, T* flat_constr_data, size_t num, size_t batch_size, cudaStream_t stream) override {};
-
-        bool ComplexDataConstraint(thrust::complex<T>* flat_src_data, thrust::complex<T>* flat_constr_data, size_t num, size_t batch_size, cudaStream_t stream) override {};
-
-        // Add src to dst
-        // flat_dst = alpha * flat_src + flat_dst 
-        bool MergeAddData(thrust::complex<T>* flat_src, thrust::complex<T>* flat_dst, T alpha, T beta, size_t num, cudaStream_t stream) override {};
-
-        // flat_src = flat_src ./ norm
-        bool Normalization(thrust::complex<T>* flat_src, T norm, size_t num, cudaStream_t stream) override {};
-        // Only support one rotating angle for now
-        // param:
-        // p : number of 2D sources
-        // m, n, l: 3 dimensions
-        // To interpolate real value, cast it to complex first
-        bool Complex2DTo3DInterpolation(thrust::complex<T>* flat_2d_src, thrust::complex<T>* flat_3D_dst, T* angles, size_t m, size_t n, size_t p, size_t l, cudaStream_t stream) override {};
-        
-#ifdef HAS_MKL
-        // MKL version, without cuda stream here
-        bool Forward2D(std::complex<T>* flat_input) override {};
-
-        bool Backward2D(std::complex<T>* flat_input) override {};
-
-        bool Forward3D(std::complex<T>* flat_input) override {};
-
-        bool Backward3D(std::complex<T>* flat_input) override {};
-
-        bool SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, size_t num, size_t batch_size) override {};
+        bool SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, size_t num, size_t batch_size) override;
 
         bool RealDataConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, size_t num, size_t batch_size) override {};
 
@@ -64,12 +65,24 @@ class CudaImpl final : public CpraImpl<T>
         bool MergeAddData(std::complex<T>* flat_src, std::complex<T>* flat_dst, T alpha, T beta, size_t num) override {};
 
         // flat_src = flat_src ./ norm
-        bool Normalization(std::complex<T>* flat_src, T norm, size_t batch_size) override {};
-
+        bool Normalization(std::complex<T>* flat_src, T norm, size_t num) override {};
+        // Only support one rotating angle for now
+        // param:
+        // p : number of 2D sources
+        // m, n, l: 3 dimensions
+        // To interpolate real value, cast it to complex first
         bool Complex2DTo3DInterpolation(std::complex<T>* flat_2d_src, std::complex<T>* flat_3D_dst, T* angles, size_t m, size_t n, size_t p, size_t l) override {};
-#endif
-
-        ~CudaImpl(){}
+        ~CudaImpl()
+        {
+            cufftDestroy(Dfti2DHandle_);
+            cufftDestroy(Dfti3DHandle_);
+            cudaStreamDestroy(stream_);
+        } 
+    private:
+        cudaStream_t stream_;
+        cufftHandle Dfti2DHandle_;
+        cufftHandle Dfti3DHandle_;
+       
 }; // CudaCpra
 
 template<typename T>

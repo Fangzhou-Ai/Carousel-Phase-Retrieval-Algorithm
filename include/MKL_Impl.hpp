@@ -76,37 +76,7 @@ class MklImpl final : public CpraImpl<T>
         bool Normalization(std::complex<T>* flat_src, T norm, size_t num) override;
 
         bool Complex2DTo3DInterpolation(std::complex<T>* flat_2d_src, std::complex<T>* flat_3D_dst, T* angles, size_t m, size_t n, size_t p, size_t l) override {};
-    
-#ifdef HAS_CUDA
-        // CUDA version with cuda stream here
-        bool Forward2D(thrust::complex<T>* flat_input, cudaStream_t stream) override {};
 
-        bool Backward2D(thrust::complex<T>* flat_input, cudaStream_t stream) override {};
-
-        bool Forward3D(thrust::complex<T>* flat_input, cudaStream_t stream) override {};
-
-        bool Backward3D(thrust::complex<T>* flat_input, cudaStream_t stream) override {};
-
-        bool SpaceConstraint(thrust::complex<T>* flat_src_data, T* flat_constr_data, size_t num, size_t batch_size, cudaStream_t stream) override {};
-
-        bool RealDataConstraint(thrust::complex<T>* flat_src_data, T* flat_constr_data, size_t num, size_t batch_size, cudaStream_t stream) override {};
-
-        bool ComplexDataConstraint(thrust::complex<T>* flat_src_data, thrust::complex<T>* flat_constr_data, size_t num, size_t batch_size, cudaStream_t stream) override {};
-
-        // Add src to dst
-        // flat_dst = alpha * flat_src + flat_dst 
-        bool MergeAddData(thrust::complex<T>* flat_src, thrust::complex<T>* flat_dst, T alpha, T beta, size_t num, cudaStream_t stream) override {};
-
-        // flat_src = flat_src ./ norm
-        bool Normalization(thrust::complex<T>* flat_src, T norm, size_t num, cudaStream_t stream) override {};
-        // Only support one rotating angle for now
-        // param:
-        // p : number of 2D sources
-        // m, n, l: 3 dimensions
-        // To interpolate real value, cast it to complex first
-        bool Complex2DTo3DInterpolation(thrust::complex<T>* flat_2d_src, thrust::complex<T>* flat_3D_dst, T* angles, size_t m, size_t n, size_t p, size_t l, cudaStream_t stream) override {};
-
-#endif
         ~MklImpl()
         {
             DftiFreeDescriptor(&Dfti2DHandle_);
