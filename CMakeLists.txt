@@ -19,11 +19,6 @@ option(BUILD_TEST CACHE OFF)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
-# Build GLOG
-add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/glog)
-include_directories(${CMAKE_SOURCE_DIR}/third_party/glog)                      # glog header
-
-
 # CUDA_enabled device
 if(HAS_CUDA)
     find_package(CUDAToolkit REQUIRED)
