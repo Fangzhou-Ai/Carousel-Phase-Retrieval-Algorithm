@@ -3,6 +3,7 @@
 #include "CPRA_Impl.hpp"
 #include "mkl_dfti.h"
 #include "mkl_service.h"
+#include <cstring>
 namespace CPRA
 {
 template <typename T>    
@@ -77,6 +78,14 @@ class MklImpl final : public CpraImpl<T>
 
         bool Complex2DTo3DInterpolation(std::complex<T>* flat_2d_src, std::complex<T>* flat_3D_dst, T* angles, size_t m, size_t n, size_t p, size_t l) override {};
 
+        bool Memcpy(void* dst, void* src, size_t bytes) override
+        {
+            std::memcpy(dst, src, bytes);
+        }
+        bool Sync() override
+        {
+            return true;
+        }
         ~MklImpl()
         {
             DftiFreeDescriptor(&Dfti2DHandle_);

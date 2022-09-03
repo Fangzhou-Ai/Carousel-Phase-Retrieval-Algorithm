@@ -23,13 +23,13 @@ class CudaAllocator final : public AllocatorInterface
         void* allocate(size_t alloc_bytes, int alignment = 64) const override
         {
             void* ptr;
-            cudaMalloc((void**) & ptr, alloc_bytes);
+            CPRA_CUDA_TRY(cudaMalloc((void**) & ptr, alloc_bytes));
             return ptr;
         }
 
         void deallocate(void* dealloc_ptr) const override
         {
-            cudaFree(dealloc_ptr);
+            CPRA_CUDA_TRY(cudaFree(dealloc_ptr));
         }
 };
 
@@ -41,13 +41,13 @@ class CudaManagedAllocator final : public AllocatorInterface
         void* allocate(size_t alloc_bytes, int alignment = 64) const override
         {
             void* ptr;
-            cudaMallocManaged((void**) & ptr, alloc_bytes);
+            CPRA_CUDA_TRY(cudaMallocManaged((void**) & ptr, alloc_bytes));
             return ptr;
         }
 
         void deallocate(void* dealloc_ptr) const override
         {
-            cudaFree(dealloc_ptr);
+            CPRA_CUDA_TRY(cudaFree(dealloc_ptr));
         }
 };
 #endif

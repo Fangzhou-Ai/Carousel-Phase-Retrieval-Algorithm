@@ -3,11 +3,11 @@
 
 cmake_minimum_required(VERSION 3.18)
 
-project(CPRA CXX CUDA)
+project(CPRA CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wno-return-type -Wno-unused-result")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-return-type -Wno-unused-result")
 
 # CUDA version
 option(HAS_CUDA CACHE OFF)
@@ -27,6 +27,7 @@ include_directories(${CMAKE_SOURCE_DIR}/third_party/glog)                      #
 # CUDA_enabled device
 if(HAS_CUDA)
     find_package(CUDAToolkit REQUIRED)
+    enable_language(CUDA)
     add_definitions(-DHAS_CUDA)
 endif()
 
@@ -52,6 +53,7 @@ endif()
         set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
         add_definitions(-DHAS_OMP)
     endif()
+    
 include_directories(${CMAKE_SOURCE_DIR}/include)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 

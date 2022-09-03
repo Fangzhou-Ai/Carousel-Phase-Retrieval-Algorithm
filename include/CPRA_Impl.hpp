@@ -49,6 +49,10 @@ class CpraImpl
         // To interpolate real value, cast it to complex first
         virtual bool Complex2DTo3DInterpolation(std::complex<T>* flat_2d_src, std::complex<T>* flat_3D_dst, T* angles, size_t m, size_t n, size_t p, size_t l) = 0;
 
+        virtual bool Memcpy(void* dst, void* src, size_t bytes) = 0;
+        
+        virtual bool Sync() = 0;
+        
         virtual ~CpraImpl(){}
 };
 

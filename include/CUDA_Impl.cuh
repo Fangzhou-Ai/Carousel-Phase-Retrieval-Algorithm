@@ -4,6 +4,7 @@
 #include "CUDA_Error_Check.hpp"
 #include <cufft.h>
 #include <thrust/complex.h>
+#include <curand.h>
 namespace CPRA
 {
 template <typename T>
@@ -37,9 +38,12 @@ class CudaImpl final : public CpraImpl<T>
                     NULL, 1, 0,
                     CUFFT_Z2Z, batch_size);
             }
-            cudaStreamCreate(&stream_);
+            CPRA_CUDA_TRY(cudaStreamCreate(&stream_));
             cufftSetStream(Dfti2DHandle_, stream_);
             cufftSetStream(Dfti3DHandle_, stream_);
+            // Random Uniform
+            CPRA_CURAND_CALL(curandCreateGenerator(&cuRandHandle, CURAND_RNG_PSEUDO_MT19937));
+            CPRA_CURAND_CALL(curandSetPseudoRandomGeneratorSeed(cuRandHandle, time(NULL)));
         }
 
         // Initialize
@@ -72,16 +76,31 @@ class CudaImpl final : public CpraImpl<T>
         // m, n, l: 3 dimensions
         // To interpolate real value, cast it to complex first
         bool Complex2DTo3DInterpolation(std::complex<T>* flat_2d_src, std::complex<T>* flat_3D_dst, T* angles, size_t m, size_t n, size_t p, size_t l) override {};
+
+        bool Memcpy(void* dst, void* src, size_t bytes) override
+        {
+            CPRA_CUDA_TRY(cudaMemcpyAsync(dst, src, bytes, cudaMemcpyDefault, stream_));
+            return true;
+        }
+
+        bool Sync() override
+        {
+            CPRA_CUDA_TRY(cudaStreamSynchronize(stream_));
+            return true;
+        }
+
         ~CudaImpl()
         {
             cufftDestroy(Dfti2DHandle_);
             cufftDestroy(Dfti3DHandle_);
-            cudaStreamDestroy(stream_);
+            CPRA_CUDA_TRY(cudaStreamDestroy(stream_));
+            CPRA_CURAND_CALL(curandDestroyGenerator(cuRandHandle));
         } 
     private:
         cudaStream_t stream_;
         cufftHandle Dfti2DHandle_;
         cufftHandle Dfti3DHandle_;
+        curandGenerator_t cuRandHandle;
        
 }; // CudaCpra
 

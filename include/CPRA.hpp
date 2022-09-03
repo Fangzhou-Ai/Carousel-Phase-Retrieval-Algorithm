@@ -1,22 +1,22 @@
 #pragma once
-#include "Impl_Factory.hpp"
-#include "Allocator.hpp"
-
+#include <memory>
 #include <filesystem>
 #include <cstddef>
 #include <string>
+#include "Impl_Factory.hpp"
+#include "Allocator.hpp"
 
 namespace CPRA{
 
-template<typename T, IMPL_TYPE type = IMPL_TYPE::CUDA>
+template<typename T, IMPL_TYPE type>
 class Cpra
 {
     public:
         Cpra() = default;
         Cpra(size_t m, size_t n, size_t l, size_t batch_size) : type_(type)
         {
-           impl_ = NewCpraImpl<T>(type, m, n, l, batch_size);
-           alloc_ = NewAllocator(type);
+           impl_ = NewCpraImpl<T>(type_, m, n, l, batch_size);
+           alloc_ = NewAllocator(type_);
         }
 
         ~Cpra(){}

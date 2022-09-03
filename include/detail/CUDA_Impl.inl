@@ -1,5 +1,4 @@
 #pragma once
-#include <curand.h>
 #include <time.h>
 #include <typeinfo>
 #include "./detail/CUDA_Impl_Kernel.cuh"
@@ -11,16 +10,10 @@ bool CudaImpl<T>::Initialize(T* flat_data_ptr, size_t num)
 {
     // Check params
     if(num < 1) return false;
-
-    // Random Uniform
-    curandGenerator_t handle;
-    CPRA_CURAND_CALL(curandCreateGenerator(&handle, CURAND_RNG_PSEUDO_MT19937));
-    CPRA_CURAND_CALL(curandSetPseudoRandomGeneratorSeed(handle, time(NULL)));
     if constexpr(std::is_same_v<T, float>)
-        CPRA_CURAND_CALL(curandGenerateUniform(handle, flat_data_ptr, num));
+        CPRA_CURAND_CALL(curandGenerateUniform(cuRandHandle, flat_data_ptr, num));
     else
-        CPRA_CURAND_CALL(curandGenerateUniformDouble (handle, flat_data_ptr, num));
-    CPRA_CURAND_CALL(curandDestroyGenerator(handle));
+        CPRA_CURAND_CALL(curandGenerateUniformDouble (cuRandHandle, flat_data_ptr, num));
     return true;
 }
 
