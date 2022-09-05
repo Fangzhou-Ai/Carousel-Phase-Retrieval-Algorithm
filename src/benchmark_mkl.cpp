@@ -80,6 +80,8 @@ void ShrinkWrap_CPRA_MKL_Sample(int epi, int iter)
             
         }
     }
+    obj1.impl_->Sync();
+    //obj2.impl_->Sync();
     end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
     std::time_t end_time = std::chrono::system_clock::to_time_t(end);
@@ -139,7 +141,8 @@ void ShrinkWrap_Conventional_MKL_Sample(int iter)
         obj1.impl_->MergeAddData(t_random_guess_1, random_guess, BETA, 1.0, M * N * L * BATCHSIZE_CONV);
         obj1.impl_->MergeAddData(t_random_guess_2, random_guess, -1.0 * BETA, 1.0, M * N * L * BATCHSIZE_CONV);
     }
-            
+    obj1.impl_->Sync();
+    //obj2.impl_->Sync();
     end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
     std::time_t end_time = std::chrono::system_clock::to_time_t(end);
