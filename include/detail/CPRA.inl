@@ -5,7 +5,7 @@
 namespace CPRA{
 
 template<typename T, IMPL_TYPE type>
-bool Cpra<T, type>::ReadMatrixFromFile(std::string FileName, T* flat_data_ptr, size_t m, size_t n, size_t l)
+bool Cpra<T, type>::ReadMatrixFromFile(std::string FileName, T* flat_data_ptr, unsigned long long m, unsigned long long n, unsigned long long l)
 {
     if(!std::filesystem::exists(FileName))
     {
@@ -27,7 +27,7 @@ bool Cpra<T, type>::ReadMatrixFromFile(std::string FileName, T* flat_data_ptr, s
 }
 
 template<typename T, IMPL_TYPE type>
-bool Cpra<T, type>::WriteMatrixToFile(std::string FileName, T* flat_data_ptr, size_t m, size_t n, size_t l)
+bool Cpra<T, type>::WriteMatrixToFile(std::string FileName, T* flat_data_ptr, unsigned long long m, unsigned long long n, unsigned long long l)
 {
     if(std::filesystem::exists(FileName))
     {

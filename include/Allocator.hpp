@@ -8,7 +8,7 @@ class AllocatorInterface
         AllocatorInterface(){}
         virtual ~AllocatorInterface(){}
 
-        virtual void* allocate(size_t alloc_bytes, int alignment = 64) const = 0;
+        virtual void* allocate(unsigned long long alloc_bytes, int alignment = 64) const = 0;
         virtual void deallocate(void* dealloc_ptr) const = 0;
 };
 
@@ -20,7 +20,7 @@ class CudaAllocator final : public AllocatorInterface
     public:
         CudaAllocator(){}
         ~CudaAllocator(){}
-        void* allocate(size_t alloc_bytes, int alignment = 64) const override
+        void* allocate(unsigned long long alloc_bytes, int alignment = 64) const override
         {
             void* ptr;
             CPRA_CUDA_TRY(cudaMalloc((void**) & ptr, alloc_bytes));
@@ -38,7 +38,7 @@ class CudaManagedAllocator final : public AllocatorInterface
     public:
         CudaManagedAllocator(){}
         ~CudaManagedAllocator(){}
-        void* allocate(size_t alloc_bytes, int alignment = 64) const override
+        void* allocate(unsigned long long alloc_bytes, int alignment = 64) const override
         {
             void* ptr;
             CPRA_CUDA_TRY(cudaMallocManaged((void**) & ptr, alloc_bytes));
@@ -58,7 +58,7 @@ class MklAllocator final : public AllocatorInterface
     public:
         MklAllocator(){}
         ~MklAllocator(){}
-        void* allocate(size_t alloc_bytes, int alignment = 64) const override
+        void* allocate(unsigned long long alloc_bytes, int alignment = 64) const override
         {
             return mkl_malloc(alloc_bytes, alignment);
         }

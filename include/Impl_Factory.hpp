@@ -11,7 +11,7 @@
 namespace CPRA{
 
 template <typename T>
-std::unique_ptr<CpraImpl<T>> NewCpraImpl(IMPL_TYPE type, size_t m, size_t n, size_t l, size_t batch_size)
+std::unique_ptr<CpraImpl<T>> NewCpraImpl(IMPL_TYPE type, unsigned long long m, unsigned long long n, unsigned long long l, unsigned long long batch_size)
 {
     switch(type)
     {

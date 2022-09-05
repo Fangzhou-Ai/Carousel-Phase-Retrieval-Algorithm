@@ -4,13 +4,13 @@
 #include "../include/CPRA.hpp"
 
 
-#define M 512
-#define N 512
-#define P 256
-#define L 512
-#define BATCHSIZE_CPRA 8
-#define BATCHSIZE_CONV 8
-#define BETA 0.9
+static constexpr unsigned long long M  = 512;
+static constexpr unsigned long long N = 512;
+static constexpr unsigned long long P = 256;
+static constexpr unsigned long long L = 512;
+static constexpr unsigned long long BATCHSIZE_CPRA = 8;
+static constexpr unsigned long long BATCHSIZE_CONV = 8;
+static constexpr float BETA = 0.9;
 void ShrinkWrap_CPRA_MKL_Sample(int epi, int iter)
 {
     // 2D part test
@@ -20,9 +20,9 @@ void ShrinkWrap_CPRA_MKL_Sample(int epi, int iter)
     std::complex<float>* random_guess = (std::complex<float>*)obj1.allocate(sizeof(std::complex<float>) * M * N * P * BATCHSIZE_CPRA);
     std::complex<float>* t_random_guess_1 = (std::complex<float>*)obj1.allocate(sizeof(std::complex<float>) * M * N * BATCHSIZE_CPRA);
     std::complex<float>* t_random_guess_2 = (std::complex<float>*)obj1.allocate(sizeof(std::complex<float>) * M * N * BATCHSIZE_CPRA);
-    obj1.impl_->Initialize((float*)random_guess, M * N * P * BATCHSIZE_CPRA * 2);
-    obj1.impl_->Initialize((float*)t_random_guess_1, M * N * BATCHSIZE_CPRA * 2);
-    obj1.impl_->Initialize((float*)t_random_guess_2, M * N * BATCHSIZE_CPRA * 2);
+    obj1.impl_->Initialize(reinterpret_cast<float*>(random_guess), M * N * P * BATCHSIZE_CPRA * 2);
+    obj1.impl_->Initialize(reinterpret_cast<float*>(t_random_guess_1), M * N * BATCHSIZE_CPRA * 2);
+    obj1.impl_->Initialize(reinterpret_cast<float*>(t_random_guess_2), M * N * BATCHSIZE_CPRA * 2);
 
 
     float* dataConstr = (float*)obj1.allocate(sizeof(float) * M * N * P);
@@ -91,6 +91,7 @@ void ShrinkWrap_CPRA_MKL_Sample(int epi, int iter)
     obj1.deallocate(t_random_guess_2);
     obj1.deallocate(dataConstr);
     obj1.deallocate(spaceConstr);
+    return;
 }
 
 void ShrinkWrap_Conventional_MKL_Sample(int iter)
@@ -99,9 +100,9 @@ void ShrinkWrap_Conventional_MKL_Sample(int iter)
     std::complex<float>* random_guess = (std::complex<float>*)obj1.allocate(sizeof(std::complex<float>) * M * N * L * BATCHSIZE_CONV);
     std::complex<float>* t_random_guess_1 = (std::complex<float>*)obj1.allocate(sizeof(std::complex<float>) * M * N * L * BATCHSIZE_CONV);
     std::complex<float>* t_random_guess_2 = (std::complex<float>*)obj1.allocate(sizeof(std::complex<float>) * M * N * L * BATCHSIZE_CONV);
-    obj1.impl_->Initialize((float*)random_guess, M * N * L * BATCHSIZE_CONV * 2);
-    obj1.impl_->Initialize((float*)t_random_guess_1, M * N * L * BATCHSIZE_CONV * 2);
-    obj1.impl_->Initialize((float*)t_random_guess_2, M * N * L * BATCHSIZE_CONV * 2);
+    obj1.impl_->Initialize(reinterpret_cast<float*>(random_guess), M * N * L * BATCHSIZE_CONV * 2);
+    obj1.impl_->Initialize(reinterpret_cast<float*>(t_random_guess_1), M * N * L * BATCHSIZE_CONV * 2);
+    obj1.impl_->Initialize(reinterpret_cast<float*>(t_random_guess_2), M * N * L * BATCHSIZE_CONV * 2);
 
 
     float* dataConstr = (float*)obj1.allocate(sizeof(float) * M * N * L);
@@ -150,6 +151,7 @@ void ShrinkWrap_Conventional_MKL_Sample(int iter)
     obj1.deallocate(t_random_guess_2);
     obj1.deallocate(dataConstr);
     obj1.deallocate(spaceConstr);
+    return;
 }
 
 
@@ -172,10 +174,11 @@ int main(int argc, char *argv[])
         int iter;
         iter_ss >> iter;
         std::cout << "Running Conventional benchmark, iter is " << iter << std::endl;
-         ShrinkWrap_Conventional_MKL_Sample(iter);
+        ShrinkWrap_Conventional_MKL_Sample(iter);
     }
     else
     {
         std::cerr << "Wrong num of command line arg!" << std::endl;
     }
+    return 0;
 }
