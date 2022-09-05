@@ -6,7 +6,7 @@
 namespace CPRA{
 
 template<typename T>
-bool CudaImpl<T>::Initialize(T* flat_data_ptr, unsigned long long num)
+bool CudaImpl<T>::Initialize(T* flat_data_ptr, uint64_t num)
 {
     // Check params
     if(num < 1) return false;
@@ -74,7 +74,7 @@ bool CudaImpl<T>::Backward3D(std::complex<T>* flat_input)
 }
 
 template<typename T>
-bool CudaImpl<T>::SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, unsigned long long num, unsigned long long batch_size)
+bool CudaImpl<T>::SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size)
 {
     int block_size = 256;
     int per_thread_data = 8;
@@ -86,7 +86,7 @@ bool CudaImpl<T>::SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr
 }
 
 template<typename T>
-bool CudaImpl<T>::RealDataConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, unsigned long long num, unsigned long long batch_size)
+bool CudaImpl<T>::RealDataConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size)
 {
     int block_size = 256;
     int per_thread_data = 8;
@@ -98,7 +98,7 @@ bool CudaImpl<T>::RealDataConstraint(std::complex<T>* flat_src_data, T* flat_con
 }
 
 template<typename T>
-bool CudaImpl<T>::ComplexDataConstraint(std::complex<T>* flat_src_data, std::complex<T>* flat_constr_data, unsigned long long num, unsigned long long batch_size)
+bool CudaImpl<T>::ComplexDataConstraint(std::complex<T>* flat_src_data, std::complex<T>* flat_constr_data, uint64_t num, uint64_t batch_size)
 {
     int block_size = 256;
     int per_thread_data = 8;
@@ -110,7 +110,7 @@ bool CudaImpl<T>::ComplexDataConstraint(std::complex<T>* flat_src_data, std::com
 }
 
 template<typename T>
-bool CudaImpl<T>::MergeAddData(std::complex<T>* flat_src, std::complex<T>* flat_dst, T alpha, T beta, unsigned long long num)
+bool CudaImpl<T>::MergeAddData(std::complex<T>* flat_src, std::complex<T>* flat_dst, T alpha, T beta, uint64_t num)
 {
     int block_size = 256;
     int per_thread_data = 8;
@@ -122,7 +122,7 @@ bool CudaImpl<T>::MergeAddData(std::complex<T>* flat_src, std::complex<T>* flat_
 }
 
 template<typename T>
-bool CudaImpl<T>::Normalization(std::complex<T>* flat_src, T norm, unsigned long long num)
+bool CudaImpl<T>::Normalization(std::complex<T>* flat_src, T norm, uint64_t num)
 {
     int block_size = 256;
     int per_thread_data = 8;

@@ -5,7 +5,7 @@ namespace CPRA
 {
 
 template<typename T>
-bool MklImpl<T>::Initialize(T* flat_data_ptr, unsigned long long num)
+bool MklImpl<T>::Initialize(T* flat_data_ptr, uint64_t num)
 {
     // Check params
     if(num < 1) return false;
@@ -18,7 +18,7 @@ bool MklImpl<T>::Initialize(T* flat_data_ptr, unsigned long long num)
 #ifdef HAS_OMP
 #pragma omp for
 #endif
-    for(unsigned long long i = 0; i < num; i++)
+    for(uint64_t i = 0; i < num; i++)
     {
         flat_data_ptr[i] = distribution(generator);
     }
@@ -29,7 +29,7 @@ bool MklImpl<T>::Initialize(T* flat_data_ptr, unsigned long long num)
 }
 
 template<typename T>
-bool MklImpl<T>::MergeAddData(std::complex<T>* flat_src, std::complex<T>* flat_dst, T alpha, T beta, unsigned long long num)
+bool MklImpl<T>::MergeAddData(std::complex<T>* flat_src, std::complex<T>* flat_dst, T alpha, T beta, uint64_t num)
 {
     if(alpha == 0 || num == 0) return false;
     std::complex<T> _a;
@@ -50,7 +50,7 @@ bool MklImpl<T>::MergeAddData(std::complex<T>* flat_src, std::complex<T>* flat_d
 }
 
 template<typename T>
-bool MklImpl<T>::Normalization(std::complex<T>* flat_src, T norm, unsigned long long num)
+bool MklImpl<T>::Normalization(std::complex<T>* flat_src, T norm, uint64_t num)
 {
     if(norm == 0 || num == 0) return false;
     std::complex<T> a;
@@ -68,13 +68,13 @@ bool MklImpl<T>::Normalization(std::complex<T>* flat_src, T norm, unsigned long 
 }
 
 template<typename T>
-bool MklImpl<T>::SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, unsigned long long num, unsigned long long batch_size)
+bool MklImpl<T>::SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size)
 {
     if(num == 0 || batch_size == 0) return false;
 #ifdef HAS_OMP
 #pragma omp parallel for
 #endif
-    for(unsigned long long i = 0; i < num; i++)
+    for(uint64_t i = 0; i < num; i++)
     {
         flat_src_data[i].imag(0);
         if(flat_constr_data[i % (num / batch_size)] == 0)
@@ -84,13 +84,13 @@ bool MklImpl<T>::SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr_
 }
 
 template<typename T>
-bool MklImpl<T>::RealDataConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, unsigned long long num, unsigned long long batch_size)
+bool MklImpl<T>::RealDataConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size)
 {
     if(num == 0 || batch_size == 0) return false;
 #ifdef HAS_OMP
 #pragma omp parallel for
 #endif
-    for(unsigned long long i = 0; i < num; i++)
+    for(uint64_t i = 0; i < num; i++)
     {
         if(flat_constr_data[i % (num / batch_size)] == 0)
         {
@@ -108,14 +108,14 @@ bool MklImpl<T>::RealDataConstraint(std::complex<T>* flat_src_data, T* flat_cons
 }
 
 template<typename T>
-bool MklImpl<T>::ComplexDataConstraint(std::complex<T>* flat_src_data, std::complex<T>* flat_constr_data, unsigned long long num, unsigned long long batch_size)
+bool MklImpl<T>::ComplexDataConstraint(std::complex<T>* flat_src_data, std::complex<T>* flat_constr_data, uint64_t num, uint64_t batch_size)
 {
 
     if(num == 0 || batch_size == 0) return false;
 #ifdef HAS_OMP
 #pragma omp parallel for
 #endif
-    for(unsigned long long i = 0; i < num; i++)
+    for(uint64_t i = 0; i < num; i++)
     {
         if(std::norm(flat_constr_data[i % (num / batch_size)]) == 0)
         {

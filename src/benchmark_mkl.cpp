@@ -4,12 +4,12 @@
 #include "../include/CPRA.hpp"
 
 
-static constexpr unsigned long long M  = 512;
-static constexpr unsigned long long N = 512;
-static constexpr unsigned long long P = 256;
-static constexpr unsigned long long L = 512;
-static constexpr unsigned long long BATCHSIZE_CPRA = 8;
-static constexpr unsigned long long BATCHSIZE_CONV = 8;
+static constexpr uint64_t M  = 512;
+static constexpr uint64_t N = 512;
+static constexpr uint64_t P = 256;
+static constexpr uint64_t L = 512;
+static constexpr uint64_t BATCHSIZE_CPRA = 8;
+static constexpr uint64_t BATCHSIZE_CONV = 8;
 static constexpr float BETA = 0.9;
 void ShrinkWrap_CPRA_MKL_Sample(int epi, int iter)
 {

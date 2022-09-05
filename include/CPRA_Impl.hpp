@@ -20,7 +20,7 @@ class CpraImpl
 {
     public:
         CpraImpl(){}
-        virtual bool Initialize(T* flat_data_ptr, unsigned long long num) = 0;
+        virtual bool Initialize(T* flat_data_ptr, uint64_t num) = 0;
         // Fixed FFT size for better performance
         virtual bool Forward2D(std::complex<T>* flat_input) = 0;
 
@@ -30,26 +30,26 @@ class CpraImpl
 
         virtual bool Backward3D(std::complex<T>* flat_input) = 0;
 
-        virtual bool SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, unsigned long long num, unsigned long long batch_size) = 0;
+        virtual bool SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size) = 0;
 
-        virtual bool RealDataConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, unsigned long long num, unsigned long long batch_size) = 0;
+        virtual bool RealDataConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size) = 0;
 
-        virtual bool ComplexDataConstraint(std::complex<T>* flat_src_data, std::complex<T>* flat_constr_data, unsigned long long num, unsigned long long batch_size) = 0;
+        virtual bool ComplexDataConstraint(std::complex<T>* flat_src_data, std::complex<T>* flat_constr_data, uint64_t num, uint64_t batch_size) = 0;
 
         // Add src to dst
         // flat_dst = alpha * flat_src + flat_dst 
-        virtual bool MergeAddData(std::complex<T>* flat_src, std::complex<T>* flat_dst, T alpha, T beta, unsigned long long num) = 0;
+        virtual bool MergeAddData(std::complex<T>* flat_src, std::complex<T>* flat_dst, T alpha, T beta, uint64_t num) = 0;
 
         // flat_src = flat_src ./ norm
-        virtual bool Normalization(std::complex<T>* flat_src, T norm, unsigned long long num) = 0;
+        virtual bool Normalization(std::complex<T>* flat_src, T norm, uint64_t num) = 0;
         // Only support one rotating angle for now
         // param:
         // p : number of 2D sources
         // m, n, l: 3 dimensions
         // To interpolate real value, cast it to complex first
-        virtual bool Complex2DTo3DInterpolation(std::complex<T>* flat_2d_src, std::complex<T>* flat_3D_dst, T* angles, unsigned long long m, unsigned long long n, unsigned long long p, unsigned long long l) = 0;
+        virtual bool Complex2DTo3DInterpolation(std::complex<T>* flat_2d_src, std::complex<T>* flat_3D_dst, T* angles, uint64_t m, uint64_t n, uint64_t p, uint64_t l) = 0;
 
-        virtual bool Memcpy(void* dst, void* src, unsigned long long bytes) = 0;
+        virtual bool Memcpy(void* dst, void* src, uint64_t bytes) = 0;
         
         virtual bool Sync() = 0;
         

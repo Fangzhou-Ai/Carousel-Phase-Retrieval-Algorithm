@@ -11,10 +11,10 @@ class MklImpl final : public CpraImpl<T>
 {
     public:
         MklImpl() = default;
-        MklImpl(unsigned long long m, 
-                unsigned long long n, 
-                unsigned long long l, 
-                unsigned long long batch_size) : m_(m), n_(n), l_(l), batch_size_(batch_size)
+        MklImpl(uint64_t m, 
+                uint64_t n, 
+                uint64_t l, 
+                uint64_t batch_size) : m_(m), n_(n), l_(l), batch_size_(batch_size)
         {
             MKL_LONG dim2D[2] = {m_, n_};
             MKL_LONG dim3D[3] = {m_, n_, l_};
@@ -121,7 +121,7 @@ class MklImpl final : public CpraImpl<T>
         }
         
         // Initialize
-        bool Initialize(T* flat_data_ptr, unsigned long long num) override;
+        bool Initialize(T* flat_data_ptr, uint64_t num) override;
 
         bool Forward2D(std::complex<T>* flat_input) override;
 
@@ -131,22 +131,22 @@ class MklImpl final : public CpraImpl<T>
 
         bool Backward3D(std::complex<T>* flat_input) override;
 
-        bool SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, unsigned long long num, unsigned long long batch_size) override;
+        bool SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size) override;
 
-        bool RealDataConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, unsigned long long num, unsigned long long batch_size) override;
+        bool RealDataConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size) override;
 
-        bool ComplexDataConstraint(std::complex<T>* flat_src_data, std::complex<T>* flat_constr_data, unsigned long long num, unsigned long long batch_size) override;
+        bool ComplexDataConstraint(std::complex<T>* flat_src_data, std::complex<T>* flat_constr_data, uint64_t num, uint64_t batch_size) override;
 
         // Add src to dst
         // flat_dst = alpha * flat_src + flat_dst 
-        bool MergeAddData(std::complex<T>* flat_src, std::complex<T>* flat_dst, T alpha, T beta, unsigned long long num) override;
+        bool MergeAddData(std::complex<T>* flat_src, std::complex<T>* flat_dst, T alpha, T beta, uint64_t num) override;
 
         // flat_src = flat_src ./ norm
-        bool Normalization(std::complex<T>* flat_src, T norm, unsigned long long num) override;
+        bool Normalization(std::complex<T>* flat_src, T norm, uint64_t num) override;
 
-        bool Complex2DTo3DInterpolation(std::complex<T>* flat_2d_src, std::complex<T>* flat_3D_dst, T* angles, unsigned long long m, unsigned long long n, unsigned long long p, unsigned long long l) override {};
+        bool Complex2DTo3DInterpolation(std::complex<T>* flat_2d_src, std::complex<T>* flat_3D_dst, T* angles, uint64_t m, uint64_t n, uint64_t p, uint64_t l) override {};
 
-        bool Memcpy(void* dst, void* src, unsigned long long bytes) override
+        bool Memcpy(void* dst, void* src, uint64_t bytes) override
         {
             std::memcpy(dst, src, bytes);
         }
@@ -169,10 +169,10 @@ class MklImpl final : public CpraImpl<T>
         }
 
     private:
-        unsigned long long m_;
-        unsigned long long n_;
-        unsigned long long l_;
-        unsigned long long batch_size_;
+        uint64_t m_;
+        uint64_t n_;
+        uint64_t l_;
+        uint64_t batch_size_;
         bool inplace_;
         DFTI_DESCRIPTOR_HANDLE Dfti2DHandle_;
         DFTI_DESCRIPTOR_HANDLE Dfti3DHandle_;
@@ -182,7 +182,7 @@ class MklImpl final : public CpraImpl<T>
 };  // MklCpra
 
 template<typename T>
-std::unique_ptr<CpraImpl<T>> NewMKLImpl(unsigned long long m, unsigned long long n, unsigned long long l, unsigned long long batch_size)
+std::unique_ptr<CpraImpl<T>> NewMKLImpl(uint64_t m, uint64_t n, uint64_t l, uint64_t batch_size)
 {
     return std::make_unique<MklImpl<T>>(m, n, l, batch_size);
 }

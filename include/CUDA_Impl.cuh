@@ -12,7 +12,7 @@ class CudaImpl final : public CpraImpl<T>
 {
     public:
         CudaImpl() = default;
-        CudaImpl(unsigned long long m, unsigned long long n, unsigned long long l, unsigned long long batch_size)
+        CudaImpl(uint64_t m, uint64_t n, uint64_t l, uint64_t batch_size)
         {
             int Dim2D[2] = {m, n};
             int Dim3D[3] = {m, n, l};
@@ -47,7 +47,7 @@ class CudaImpl final : public CpraImpl<T>
         }
 
         // Initialize
-        bool Initialize(T* flat_data_ptr, unsigned long long num) override;
+        bool Initialize(T* flat_data_ptr, uint64_t num) override;
 
         // CUDA version with cuda stream here
         bool Forward2D(std::complex<T>* flat_input) override;
@@ -58,26 +58,26 @@ class CudaImpl final : public CpraImpl<T>
 
         bool Backward3D(std::complex<T>* flat_input) override;
 
-        bool SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, unsigned long long num, unsigned long long batch_size) override;
+        bool SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size) override;
 
-        bool RealDataConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, unsigned long long num, unsigned long long batch_size) override;
+        bool RealDataConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size) override;
 
-        bool ComplexDataConstraint(std::complex<T>* flat_src_data, std::complex<T>* flat_constr_data, unsigned long long num, unsigned long long batch_size) override;
+        bool ComplexDataConstraint(std::complex<T>* flat_src_data, std::complex<T>* flat_constr_data, uint64_t num, uint64_t batch_size) override;
 
         // Add src to dst
         // flat_dst = alpha * flat_src + flat_dst 
-        bool MergeAddData(std::complex<T>* flat_src, std::complex<T>* flat_dst, T alpha, T beta, unsigned long long num) override;
+        bool MergeAddData(std::complex<T>* flat_src, std::complex<T>* flat_dst, T alpha, T beta, uint64_t num) override;
 
         // flat_src = flat_src ./ norm
-        bool Normalization(std::complex<T>* flat_src, T norm, unsigned long long num) override;
+        bool Normalization(std::complex<T>* flat_src, T norm, uint64_t num) override;
         // Only support one rotating angle for now
         // param:
         // p : number of 2D sources
         // m, n, l: 3 dimensions
         // To interpolate real value, cast it to complex first
-        bool Complex2DTo3DInterpolation(std::complex<T>* flat_2d_src, std::complex<T>* flat_3D_dst, T* angles, unsigned long long m, unsigned long long n, unsigned long long p, unsigned long long l) override {};
+        bool Complex2DTo3DInterpolation(std::complex<T>* flat_2d_src, std::complex<T>* flat_3D_dst, T* angles, uint64_t m, uint64_t n, uint64_t p, uint64_t l) override {};
 
-        bool Memcpy(void* dst, void* src, unsigned long long bytes) override
+        bool Memcpy(void* dst, void* src, uint64_t bytes) override
         {
             CPRA_CUDA_TRY(cudaMemcpyAsync(dst, src, bytes, cudaMemcpyDefault, stream_));
             return true;
@@ -105,7 +105,7 @@ class CudaImpl final : public CpraImpl<T>
 }; // CudaCpra
 
 template<typename T>
-std::unique_ptr<CpraImpl<T>> NewCUDAImpl(unsigned long long m, unsigned long long n, unsigned long long l, unsigned long long batch_size)
+std::unique_ptr<CpraImpl<T>> NewCUDAImpl(uint64_t m, uint64_t n, uint64_t l, uint64_t batch_size)
 {
     return std::make_unique<CudaImpl<T>>(m, n, l, batch_size);
 }

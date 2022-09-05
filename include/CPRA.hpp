@@ -13,7 +13,7 @@ class Cpra
 {
     public:
         Cpra() = default;
-        Cpra(unsigned long long m, unsigned long long n, unsigned long long l, unsigned long long batch_size) : type_(type)
+        Cpra(uint64_t m, uint64_t n, uint64_t l, uint64_t batch_size) : type_(type)
         {
            impl_ = NewCpraImpl<T>(type_, m, n, l, batch_size);
            alloc_ = NewAllocator(type_);
@@ -21,15 +21,15 @@ class Cpra
 
         ~Cpra(){}
         // Data I/O  
-        bool ReadMatrixFromFile(std::string FileName, T* flat_data_ptr, unsigned long long m, unsigned long long n, unsigned long long l);
-        bool WriteMatrixToFile(std::string FileName, T* flat_data_ptr, unsigned long long m, unsigned long long n, unsigned long long l);
+        bool ReadMatrixFromFile(std::string FileName, T* flat_data_ptr, uint64_t m, uint64_t n, uint64_t l);
+        bool WriteMatrixToFile(std::string FileName, T* flat_data_ptr, uint64_t m, uint64_t n, uint64_t l);
 
         // Reconstruction
-        bool PreReconstruct(unsigned long long iter_num, unsigned long long batch_size = 1){};
-        bool Reconstruct(unsigned long long epi, unsigned long long iter_per_epi, unsigned long long batch_size = 1){};
+        bool PreReconstruct(uint64_t iter_num, uint64_t batch_size = 1){};
+        bool Reconstruct(uint64_t epi, uint64_t iter_per_epi, uint64_t batch_size = 1){};
 
         // mem alloc
-        void* allocate(unsigned long long alloc_bytes, int alignment = 64)
+        void* allocate(uint64_t alloc_bytes, int alignment = 64)
         {
             return alloc_->allocate(alloc_bytes, alignment);
         }
