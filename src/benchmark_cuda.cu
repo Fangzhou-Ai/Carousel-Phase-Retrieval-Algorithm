@@ -4,12 +4,12 @@
 #include "../include/CPRA.hpp"
 
 
-static constexpr uint64_t M  = 512;
-static constexpr uint64_t N = 512;
-static constexpr uint64_t P = 256;
-static constexpr uint64_t L = 512;
-static constexpr uint64_t BATCHSIZE_CPRA = 8;
-static constexpr uint64_t BATCHSIZE_CONV = 8;
+static constexpr uint64_t M  = 256;
+static constexpr uint64_t N = 256;
+static constexpr uint64_t P = 128;
+static constexpr uint64_t L = 256;
+static constexpr uint64_t BATCHSIZE_CPRA = 16;
+static constexpr uint64_t BATCHSIZE_CONV = 1;
 static constexpr float BETA = 0.9;
 
 void ShrinkWrap_CPRA_CUDA_Sample(int epi, int iter)
@@ -30,16 +30,6 @@ void ShrinkWrap_CPRA_CUDA_Sample(int epi, int iter)
     compute.impl_->Initialize(dataConstr, M * N * P);
     float* spaceConstr = (float*)compute.allocate(sizeof(float) * M * N * P);
     compute.impl_->Initialize(spaceConstr, M * N * P);
-
-    // 3D complex part test
-    CPRA::Cpra<float, CPRA::IMPL_TYPE::CUDA> compute_3D(M, N, L, 1);
-    std::complex<float>* random_guess_3D = (std::complex<float>*)compute_3D.allocate(sizeof(std::complex<float>) * M * N * L);
-    std::complex<float>* complexDataConstr_3D = (std::complex<float>*)compute_3D.allocate(sizeof(std::complex<float>) * M * N * L);
-    compute_3D.impl_->Initialize(reinterpret_cast<float*>(random_guess_3D), M * N * L * 2);
-    compute_3D.impl_->Initialize(reinterpret_cast<float*>(complexDataConstr_3D), M * N * L * 2);
-
-    float* spaceConstr_3D = (float*)compute_3D.allocate(sizeof(float) * M * N * L);
-    compute_3D.impl_->Initialize(spaceConstr_3D, M * N * L);
 
     std::chrono::time_point<std::chrono::system_clock> start, endA, endB, endC, endD;
     std::chrono::duration<double> elapsed_seconds;
@@ -138,7 +128,12 @@ void ShrinkWrap_CPRA_CUDA_Sample(int epi, int iter)
     std::cout << "Finished step B computation at " << std::ctime(&end_time)
               << "elapsed time: " << elapsed_seconds.count() << "s\n";
 
-    // Step C, pick the best, omitted here
+    // Step C
+    // 1. Repeated A & B 100 times.
+    // We can calculate this by checking the batch size directly.
+    // Total time = (Time of step A + Time of step B) * 100 / BATCHSIZE_CPRA
+
+    // 2. Pick the best, omitted here.
     // This step cost O(N), compared with other steps
     // this step's time consumption is usually negligible
 
@@ -146,11 +141,27 @@ void ShrinkWrap_CPRA_CUDA_Sample(int epi, int iter)
         Step C omitted here
     */
 
+    // Free 2D memory
+    compute.deallocate(random_guess);
+    compute.deallocate(t_random_guess_1);
+    compute.deallocate(t_random_guess_2);
+    compute.deallocate(dataConstr);
+    compute.deallocate(spaceConstr);
+    
+     // 3D complex part test
+    CPRA::Cpra<float, CPRA::IMPL_TYPE::CUDA> compute_3D(M, N, L, 1);
+    std::complex<float>* random_guess_3D = (std::complex<float>*)compute_3D.allocate(sizeof(std::complex<float>) * M * N * L);
+    std::complex<float>* complexDataConstr_3D = (std::complex<float>*)compute_3D.allocate(sizeof(std::complex<float>) * M * N * L);
+    compute_3D.impl_->Initialize(reinterpret_cast<float*>(random_guess_3D), M * N * L * 2);
+    compute_3D.impl_->Initialize(reinterpret_cast<float*>(complexDataConstr_3D), M * N * L * 2);
+
+    float* spaceConstr_3D = (float*)compute_3D.allocate(sizeof(float) * M * N * L);
+    compute_3D.impl_->Initialize(spaceConstr_3D, M * N * L);
+
     endC = std::chrono::system_clock::now();
-    elapsed_seconds = endC - endB;
-    end_time = std::chrono::system_clock::to_time_t(endC);
-    std::cout << "Finished step C computation at " << std::ctime(&end_time)
-              << "elapsed time: " << elapsed_seconds.count() << "s\n";  
+    elapsed_seconds = (endB - start) * 100.0 / BATCHSIZE_CPRA;
+    //end_time = std::chrono::system_clock::to_time_t(endC);
+    std::cout << "Estimated step C elapsed time: " << elapsed_seconds.count() << "s\n";  
 
     // Step D, Reconstruct 3D object with complex phase
     // Num of iteration here is fixed at 50
@@ -169,18 +180,10 @@ void ShrinkWrap_CPRA_CUDA_Sample(int epi, int iter)
               << "elapsed time: " << elapsed_seconds.count() << "s\n";
 
     // All time
-    elapsed_seconds = endD - start;
-    end_time = std::chrono::system_clock::to_time_t(endD);
-    std::cout << "Finished all computations at " << std::ctime(&end_time)
-              << "elapsed time in total: " << elapsed_seconds.count() << "s\n";
+    elapsed_seconds = endD - endC + (endB - start) * 100.0 / BATCHSIZE_CPRA;
+    std::cout << "Estimated elapsed time with 100 initial guesses in total: " << elapsed_seconds.count() << "s\n";
 
-    // Free memory
-    compute.deallocate(random_guess);
-    compute.deallocate(t_random_guess_1);
-    compute.deallocate(t_random_guess_2);
-    compute.deallocate(dataConstr);
-    compute.deallocate(spaceConstr);
-
+    // Free 3D memory
     compute_3D.deallocate(random_guess_3D);
     compute_3D.deallocate(complexDataConstr_3D);
     compute_3D.deallocate(spaceConstr_3D);
@@ -239,7 +242,9 @@ void ShrinkWrap_Conventional_CUDA_Sample(int iter)
     std::chrono::duration<double> elapsed_seconds = end - start;
     std::time_t end_time = std::chrono::system_clock::to_time_t(end);
     std::cout << "Finished computation at " << std::ctime(&end_time)
-              << "elapsed time: " << elapsed_seconds.count() << "s\n";
+              << "elapsed time: " << elapsed_seconds.count() << "s\n"
+              << "Estimated elapsed timewith 100 intial guesses in total : " 
+              << elapsed_seconds.count() * 100 / BATCHSIZE_CONV << std::endl;
 
     // Free memory
     compute.deallocate(random_guess);
