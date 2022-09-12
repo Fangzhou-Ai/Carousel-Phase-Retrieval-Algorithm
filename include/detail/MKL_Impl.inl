@@ -117,15 +117,12 @@ bool MklImpl<T>::ComplexDataConstraint(std::complex<T>* flat_src_data, std::comp
 #endif
     for(uint64_t i = 0; i < num; i++)
     {
-        if(std::norm(flat_constr_data[i % (num / batch_size)]) == 0)
+        if(std::norm(flat_constr_data[i % (num / batch_size)]) != 0)
         {
-            // unconstraint
             // we can rarely have 0 intensity in real case
             // therefore we set 0 intensity pixel as unconstraint
-            continue;
-        }
-        else
             flat_src_data[i] = flat_constr_data[i % (num / batch_size)];
+        }
     }
     return true;
 }
@@ -136,7 +133,7 @@ bool MklImpl<T>::Forward2D(std::complex<T>* flat_input)
     status = DftiComputeForward(Dfti2DHandle_, flat_input);
     if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
     {
-    printf("Error: %s\n", DftiErrorMessage(status));
+        printf("Error: %s\n", DftiErrorMessage(status));
     }
     return true;
 }
@@ -147,7 +144,7 @@ bool MklImpl<T>::Backward2D(std::complex<T>* flat_input)
     status = DftiComputeBackward(Dfti2DHandle_, flat_input);
     if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
     {
-    printf("Error: %s\n", DftiErrorMessage(status));
+        printf("Error: %s\n", DftiErrorMessage(status));
     }
     return true;
 }
@@ -158,7 +155,7 @@ bool MklImpl<T>::Forward3D(std::complex<T>* flat_input)
     status = DftiComputeForward(Dfti3DHandle_, flat_input);
     if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
     {
-    printf("Error: %s\n", DftiErrorMessage(status));
+        printf("Error: %s\n", DftiErrorMessage(status));
     }
     return true;
 }
@@ -169,7 +166,7 @@ bool MklImpl<T>::Backward3D(std::complex<T>* flat_input)
     status = DftiComputeBackward(Dfti3DHandle_, flat_input);
     if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
     {
-    printf("Error: %s\n", DftiErrorMessage(status));
+        printf("Error: %s\n", DftiErrorMessage(status));
     }
     return true;
 }

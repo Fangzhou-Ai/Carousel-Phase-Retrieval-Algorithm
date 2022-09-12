@@ -25,44 +25,44 @@ class MklImpl final : public CpraImpl<T>
                     DFTI_COMPLEX, 2, dim2D);
                 if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
                 {
-                printf("Error: %s\n", DftiErrorMessage(status));
+                    printf("Error: %s\n", DftiErrorMessage(status));
                 }
                 status = DftiSetValue(Dfti2DHandle_, DFTI_NUMBER_OF_TRANSFORMS, batch_size_);
                 if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
                 {
-                printf("Error: %s\n", DftiErrorMessage(status));
+                    printf("Error: %s\n", DftiErrorMessage(status));
                 }
                 status = DftiSetValue(Dfti2DHandle_, DFTI_INPUT_DISTANCE, m_ * n_);
                 if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
                 {
-                printf("Error: %s\n", DftiErrorMessage(status));
+                    printf("Error: %s\n", DftiErrorMessage(status));
                 }
                 status = DftiSetValue(Dfti2DHandle_, DFTI_BACKWARD_SCALE, (float)1.0 / (m_ * n_));
                 if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
                 {
-                printf("Error: %s\n", DftiErrorMessage(status));
+                    printf("Error: %s\n", DftiErrorMessage(status));
                 }
 
                 status = DftiCreateDescriptor(&Dfti3DHandle_, DFTI_SINGLE,
                     DFTI_COMPLEX, 3, dim2D);
                 if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
                 {
-                printf("Error: %s\n", DftiErrorMessage(status));
+                    printf("Error: %s\n", DftiErrorMessage(status));
                 }
                 status = DftiSetValue(Dfti3DHandle_, DFTI_NUMBER_OF_TRANSFORMS, batch_size_);
                 if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
                 {
-                printf("Error: %s\n", DftiErrorMessage(status));
+                    printf("Error: %s\n", DftiErrorMessage(status));
                 }
                 status = DftiSetValue(Dfti3DHandle_, DFTI_INPUT_DISTANCE, m_ * n_ * l_);
                 if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
                 {
-                printf("Error: %s\n", DftiErrorMessage(status));
+                    printf("Error: %s\n", DftiErrorMessage(status));
                 }
                 status = DftiSetValue(Dfti3DHandle_, DFTI_BACKWARD_SCALE, (float)1.0 / (m_ * n_ * l_));
                 if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
                 {
-                printf("Error: %s\n", DftiErrorMessage(status));
+                    printf("Error: %s\n", DftiErrorMessage(status));
                 }
             }
             else
@@ -71,52 +71,52 @@ class MklImpl final : public CpraImpl<T>
                     DFTI_COMPLEX, 2, dim2D);
                 if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
                 {
-                printf("Error: %s\n", DftiErrorMessage(status));
+                    printf("Error: %s\n", DftiErrorMessage(status));
                 }
                 status = DftiSetValue(Dfti2DHandle_, DFTI_NUMBER_OF_TRANSFORMS, batch_size_);
                 if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
                 {
-                printf("Error: %s\n", DftiErrorMessage(status));
+                    printf("Error: %s\n", DftiErrorMessage(status));
                 }
                 status = DftiSetValue(Dfti2DHandle_, DFTI_INPUT_DISTANCE, m_ * n_);
                 status = DftiSetValue(Dfti2DHandle_, DFTI_BACKWARD_SCALE, (double)1.0 / (m_ * n_));
                 if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
                 {
-                printf("Error: %s\n", DftiErrorMessage(status));
+                    printf("Error: %s\n", DftiErrorMessage(status));
                 }
 
                 status = DftiCreateDescriptor(&Dfti3DHandle_, DFTI_DOUBLE,
                     DFTI_COMPLEX, 3, dim2D);
                 if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
                 {
-                printf("Error: %s\n", DftiErrorMessage(status));
+                    printf("Error: %s\n", DftiErrorMessage(status));
                 }
                 status = DftiSetValue(Dfti3DHandle_, DFTI_NUMBER_OF_TRANSFORMS, batch_size_);
                 if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
                 {
-                printf("Error: %s\n", DftiErrorMessage(status));
+                    printf("Error: %s\n", DftiErrorMessage(status));
                 }
                 status = DftiSetValue(Dfti3DHandle_, DFTI_INPUT_DISTANCE, m_ * n_ * l_);
                 if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
                 {
-                printf("Error: %s\n", DftiErrorMessage(status));
+                    printf("Error: %s\n", DftiErrorMessage(status));
                 }
                 status = DftiSetValue(Dfti3DHandle_, DFTI_BACKWARD_SCALE, (double)1.0 / (m_ * n_ * l_));
                 if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
                 {
-                printf("Error: %s\n", DftiErrorMessage(status));
+                    printf("Error: %s\n", DftiErrorMessage(status));
                 }
             }
 
             status = DftiCommitDescriptor(Dfti2DHandle_);
             if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
             {
-            printf("Error: %s\n", DftiErrorMessage(status));
+                printf("Error: %s\n", DftiErrorMessage(status));
             }
             status = DftiCommitDescriptor(Dfti3DHandle_);
             if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
             {
-            printf("Error: %s\n", DftiErrorMessage(status));
+                printf("Error: %s\n", DftiErrorMessage(status));
             }
         }
         
@@ -159,12 +159,12 @@ class MklImpl final : public CpraImpl<T>
             DftiFreeDescriptor(&Dfti2DHandle_);
             if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
             {
-            printf("Error: %s\n", DftiErrorMessage(status));
+                printf("Error: %s\n", DftiErrorMessage(status));
             }
             DftiFreeDescriptor(&Dfti3DHandle_);
             if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
             {
-            printf("Error: %s\n", DftiErrorMessage(status));
+                printf("Error: %s\n", DftiErrorMessage(status));
             }
         }
 
