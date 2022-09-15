@@ -46,7 +46,7 @@ void ShrinkWrap_CPRA_CUDA_Sample(int epi, int iter)
     {
         // Part 1
         compute.impl_->Forward2D(t_random_guess_1);
-        compute.impl_->RealDataConstraint(t_random_guess_1, dataConstr, M * N * BATCHSIZE_CPRA, BATCHSIZE_CPRA);
+        compute.impl_->DataConstraint(t_random_guess_1, dataConstr, M * N * BATCHSIZE_CPRA, BATCHSIZE_CPRA);
         compute.impl_->Backward2D(t_random_guess_1);
         // Sync here to make sure correct result
         //compute.impl_->Sync();
@@ -59,7 +59,7 @@ void ShrinkWrap_CPRA_CUDA_Sample(int epi, int iter)
         //compute.impl_->Sync();
         compute.impl_->MergeAddData(t_random_guess_2, random_guess, 1.0 - 1.0 / BETA, -1.0 / BETA, M * N * BATCHSIZE_CPRA);
         compute.impl_->Forward2D(t_random_guess_2);
-        compute.impl_->RealDataConstraint(t_random_guess_2, dataConstr, M * N * BATCHSIZE_CPRA, BATCHSIZE_CPRA);
+        compute.impl_->DataConstraint(t_random_guess_2, dataConstr, M * N * BATCHSIZE_CPRA, BATCHSIZE_CPRA);
         compute.impl_->Backward2D(t_random_guess_2);
 
         // Merge 
@@ -94,7 +94,7 @@ void ShrinkWrap_CPRA_CUDA_Sample(int epi, int iter)
             {
                 // Part 1
                 compute.impl_->Forward2D(t_random_guess_1);
-                compute.impl_->RealDataConstraint(t_random_guess_1, dataConstr + M * N * p, M * N * BATCHSIZE_CPRA, BATCHSIZE_CPRA);
+                compute.impl_->DataConstraint(t_random_guess_1, dataConstr + M * N * p, M * N * BATCHSIZE_CPRA, BATCHSIZE_CPRA);
                 compute.impl_->Backward2D(t_random_guess_1);
                 // Sync here to make sure correct result
                 //compute.impl_->Sync();
@@ -107,7 +107,7 @@ void ShrinkWrap_CPRA_CUDA_Sample(int epi, int iter)
                 //compute.impl_->Sync();
                 compute.impl_->MergeAddData(t_random_guess_2, random_guess + M * N * BATCHSIZE_CPRA * p, 1.0 - 1.0 / BETA, -1.0 / BETA, M * N * BATCHSIZE_CPRA);
                 compute.impl_->Forward2D(t_random_guess_2);
-                compute.impl_->RealDataConstraint(t_random_guess_2, dataConstr + M * N * p, M * N * BATCHSIZE_CPRA, BATCHSIZE_CPRA);
+                compute.impl_->DataConstraint(t_random_guess_2, dataConstr + M * N * p, M * N * BATCHSIZE_CPRA, BATCHSIZE_CPRA);
                 compute.impl_->Backward2D(t_random_guess_2);
 
                 // Merge 
@@ -168,7 +168,7 @@ void ShrinkWrap_CPRA_CUDA_Sample(int epi, int iter)
     for(auto i = 0; i < 50; i++)
     {
         compute_3D.impl_->Forward3D(random_guess_3D);
-        compute_3D.impl_->ComplexDataConstraint(random_guess_3D, complexDataConstr_3D, M * N * L, 1);
+        compute_3D.impl_->DataConstraint(random_guess_3D, complexDataConstr_3D, M * N * L, 1);
         compute_3D.impl_->Backward3D(random_guess_3D);
         compute_3D.impl_->SpaceConstraint(random_guess_3D, spaceConstr_3D, M * N * L, 1);
     }
@@ -220,7 +220,7 @@ void ShrinkWrap_Conventional_CUDA_Sample(int iter)
     {
         // Part 1
         compute.impl_->Forward2D(t_random_guess_1);
-        compute.impl_->RealDataConstraint(t_random_guess_1, dataConstr, M * N * L * BATCHSIZE_CONV, BATCHSIZE_CONV);
+        compute.impl_->DataConstraint(t_random_guess_1, dataConstr, M * N * L * BATCHSIZE_CONV, BATCHSIZE_CONV);
         compute.impl_->Backward2D(t_random_guess_1);
         compute.impl_->MergeAddData(t_random_guess_1, random_guess, 1.0 + 1.0 / BETA, -1.0 / BETA, M * N * L * BATCHSIZE_CONV);
         compute.impl_->SpaceConstraint(t_random_guess_1, spaceConstr, M * N * L * BATCHSIZE_CONV, BATCHSIZE_CONV);
@@ -229,7 +229,7 @@ void ShrinkWrap_Conventional_CUDA_Sample(int iter)
         compute.impl_->SpaceConstraint(t_random_guess_2, spaceConstr, M * N * L * BATCHSIZE_CONV, BATCHSIZE_CONV);
         compute.impl_->MergeAddData(t_random_guess_2, random_guess, 1.0 - 1.0 / BETA, -1.0 / BETA, M * N * L * BATCHSIZE_CONV);
         compute.impl_->Forward2D(t_random_guess_2);
-        compute.impl_->RealDataConstraint(t_random_guess_2, dataConstr, M * N * L * BATCHSIZE_CONV, BATCHSIZE_CONV);
+        compute.impl_->DataConstraint(t_random_guess_2, dataConstr, M * N * L * BATCHSIZE_CONV, BATCHSIZE_CONV);
         compute.impl_->Backward2D(t_random_guess_2);
 
         // Merge 
