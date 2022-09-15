@@ -86,25 +86,25 @@ bool CudaImpl<T>::SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr
 }
 
 template<typename T>
-bool CudaImpl<T>::RealDataConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size)
+bool CudaImpl<T>::DataConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size)
 {
     int block_size = 256;
     int per_thread_data = 8;
     int per_block_data = block_size * per_thread_data;
     int grid_size = (num + per_block_data - 1) / per_block_data;
-    Kernel::ker_RealDataConstraint<T><<<grid_size, block_size, 0, stream_>>>
+    Kernel::ker_DataConstraint<T><<<grid_size, block_size, 0, stream_>>>
     ((thrust::complex<T>*)flat_src_data, flat_constr_data, num, batch_size);
     return true;
 }
 
 template<typename T>
-bool CudaImpl<T>::ComplexDataConstraint(std::complex<T>* flat_src_data, std::complex<T>* flat_constr_data, uint64_t num, uint64_t batch_size)
+bool CudaImpl<T>::DataConstraint(std::complex<T>* flat_src_data, std::complex<T>* flat_constr_data, uint64_t num, uint64_t batch_size)
 {
     int block_size = 256;
     int per_thread_data = 8;
     int per_block_data = block_size * per_thread_data;
     int grid_size = (num + per_block_data - 1) / per_block_data;
-    Kernel::ker_ComplexDataConstraint<T><<<grid_size, block_size, 0, stream_>>>
+    Kernel::ker_DataConstraint<T><<<grid_size, block_size, 0, stream_>>>
     ((thrust::complex<T>*)flat_src_data, (thrust::complex<T>*)flat_constr_data, num, batch_size);
     return true;
 }

@@ -31,10 +31,10 @@ class CpraImpl
         virtual bool Backward3D(std::complex<T>* flat_input) = 0;
 
         virtual bool SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size) = 0;
-
-        virtual bool RealDataConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size) = 0;
-
-        virtual bool ComplexDataConstraint(std::complex<T>* flat_src_data, std::complex<T>* flat_constr_data, uint64_t num, uint64_t batch_size) = 0;
+        // Real data constraint
+        virtual bool DataConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size) = 0;
+        // Complex data constraint
+        virtual bool DataConstraint(std::complex<T>* flat_src_data, std::complex<T>* flat_constr_data, uint64_t num, uint64_t batch_size) = 0;
 
         // Add src to dst
         // flat_dst = alpha * flat_src + flat_dst 

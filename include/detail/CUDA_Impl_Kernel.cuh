@@ -24,7 +24,7 @@ __global__ void ker_SpaceConstraint(thrust::complex<T>* flat_src_data, T* flat_c
 }
 
 template<typename T>
-__global__ void ker_RealDataConstraint(thrust::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size)
+__global__ void ker_DataConstraint(thrust::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size)
 {
     for(uint64_t i = cg::this_grid().thread_rank(); i < num; i+= cg::this_grid().size())
     {
@@ -33,7 +33,7 @@ __global__ void ker_RealDataConstraint(thrust::complex<T>* flat_src_data, T* fla
 }
 
 template<typename T>
-__global__ void ker_ComplexDataConstraint(thrust::complex<T>* flat_src_data, thrust::complex<T>* flat_constr_data, uint64_t num, uint64_t batch_size)
+__global__ void ker_DataConstraint(thrust::complex<T>* flat_src_data, thrust::complex<T>* flat_constr_data, uint64_t num, uint64_t batch_size)
 {
     for(uint64_t i = cg::this_grid().thread_rank(); i < num; i+= cg::this_grid().size())
     {

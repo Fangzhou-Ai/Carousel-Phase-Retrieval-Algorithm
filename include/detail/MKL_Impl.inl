@@ -84,7 +84,7 @@ bool MklImpl<T>::SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr_
 }
 
 template<typename T>
-bool MklImpl<T>::RealDataConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size)
+bool MklImpl<T>::DataConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size)
 {
     if(num == 0 || batch_size == 0) return false;
 #ifdef HAS_OMP
@@ -108,7 +108,7 @@ bool MklImpl<T>::RealDataConstraint(std::complex<T>* flat_src_data, T* flat_cons
 }
 
 template<typename T>
-bool MklImpl<T>::ComplexDataConstraint(std::complex<T>* flat_src_data, std::complex<T>* flat_constr_data, uint64_t num, uint64_t batch_size)
+bool MklImpl<T>::DataConstraint(std::complex<T>* flat_src_data, std::complex<T>* flat_constr_data, uint64_t num, uint64_t batch_size)
 {
 
     if(num == 0 || batch_size == 0) return false;
