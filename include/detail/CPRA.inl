@@ -1,6 +1,7 @@
 #pragma once
 #include <fstream>
 #include <cstdio>
+#include <iostream>
 
 namespace CPRA{
 

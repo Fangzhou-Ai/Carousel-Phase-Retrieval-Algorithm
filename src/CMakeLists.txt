@@ -1,3 +1,6 @@
+find_package(Boost COMPONENTS program_options REQUIRED)
+include_directories(${Boost_INCLUDE_DIR})
+
 if(HAS_CUDA)
     add_executable(
             benchmark_cuda
@@ -11,6 +14,23 @@ if(HAS_CUDA)
         CUDA::cufft
     )
     target_compile_options(benchmark_cuda PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
+                       --generate-line-info
+                       --use_fast_math
+                       >)
+
+    add_executable(
+            CPRA_CUDA
+            CPRA_CUDA.cu
+        )
+    target_link_libraries(
+        CPRA_CUDA 
+        PRIVATE 
+        CUDA::cudart  
+        CUDA::curand
+        CUDA::cufft
+        ${Boost_LIBRARIES}
+    )
+    target_compile_options(CPRA_CUDA PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
                        --generate-line-info
                        --use_fast_math
                        >)

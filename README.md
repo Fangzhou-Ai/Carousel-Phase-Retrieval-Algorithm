@@ -5,6 +5,7 @@ Carousel Phase Retrieval Algorithm (CPRA)
 - Cmake minimum requirement 3.18
 - To build CUDA and enable UVM oversubscription function, only LINUX is supported, otherwise WINDOWS is also supported.
 - To build MKL version, please install Intel oneAPI toolkit, old Intel MKL toolkit can't be found by Cmake automatically (Can be added manually in CmakeLists.txt)
+- Boost
 
 # Building instructions
 - Don't build CUDA and MKL version together, because NVCC can't link MKL.
