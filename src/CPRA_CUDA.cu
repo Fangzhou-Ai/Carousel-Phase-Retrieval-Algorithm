@@ -1,11 +1,10 @@
 #include "../include/CPRA.hpp"
+#include "../include/Command_Parser.hpp"
 #include <iostream>
-#include <boost/program_options.hpp>
 #include <sstream>
 #include <chrono> 
 #include <vector>
 #include <string>
-namespace po = boost::program_options;
 
 std::complex<float>* ShrinkWrap_CPRA_CUDA_Sample(int M, int N, int L, int P, int BATCHSIZE_CPRA, 
                                                  float* dataConstr, float* spaceConstr, 
@@ -109,51 +108,7 @@ std::complex<float>* ShrinkWrap_CPRA_CUDA_Sample(int M, int N, int L, int P, int
 
 int main(int argc, const char* argv[])
 {
-    // Params parser
-    po::options_description desc("Allowed options");
-    desc.add_options()
-        ("help", "produce help message")
-        ("M", po::value<int>(), "set first dimension")
-        ("N", po::value<int>(), "set second dimension")
-        ("L", po::value<int>(), "set third dimension")
-        ("P", po::value<int>(), "set number of projected objects")
-        ("Batch", po::value<int>(), "set batch size")
-        ("Beta", po::value<float>(), "set shrinkwrap beta value")
-        ("data_constraint", po::value<std::string>()->required(), "Data Constraint file")
-        ("space_constraint", po::value<std::string>()->required(), "Space Constraint file")
-        ("output_reconstruction", po::value<std::string>()->required(), "Output file for reconstructions")
-        ("output_error", po::value<std::string>()->required(), "Output file for errors")
-    ;
-
-    po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, desc), vm);
-    po::notify(vm); 
-
-    if (vm.count("help"))
-    {
-        std::cout << desc << std::endl;
-        return 1;
-    }
-    // get parameters
-    int M = vm["M"].as<int>();
-    int N = vm["N"].as<int>();
-    int L = vm["L"].as<int>();
-    int P = vm["P"].as<int>();
-    int Batch = vm["Batch"].as<int>();
-    float Beta = vm["Beta"].as<float>();
-    const std::string data_constraint = vm["data_constraint"].as<std::string>();
-    const std::string space_constraint = vm["space_constraint"].as<std::string>();
-    const std::string output_reconstruction = vm["output_reconstruction"].as<std::string>();
-    const std::string output_error = vm["output_error"].as<std::string>();
-    // Output parameters
-    std::cout << "CPRA CUDA implementiation, Fangzhou Ai @ Prof. Vitaliy Lomakin's group UCSD." << std::endl;
-    std::cout << "Object dimension is " << M << ", " << N << ", " << L << "." << std::endl;
-    std::cout << "Number of projected object is " << P << "." << std::endl;
-    std::cout << "Batch size is " << Batch << "." << std::endl;
-    std::cout << "Shrinkwrap hyper-param beta is " << Beta << "." << std::endl;
-    std::cout << "Data constraint file is " << data_constraint << "." << std::endl;
-    std::cout << "Space constraint file is " << space_constraint << "." << std::endl;
-    std::cout << "Output reconstructions file is " << output_reconstruction << "." << std::endl;
-    std::cout << "Output errors file is " << output_error << "." << std::endl;
+    CPRA::Parser parser;
+    parser.parse(argc, argv);
     return EXIT_SUCCESS;
 }
