@@ -48,6 +48,8 @@ class CpraImpl
         // m, n, l: 3 dimensions
         // To interpolate real value, cast it to complex first
         virtual bool Complex2DTo3DInterpolation(std::complex<T>* flat_2d_src, std::complex<T>* flat_3D_dst, T* angles, uint64_t m, uint64_t n, uint64_t p, uint64_t l) = 0;
+        // flat_error has to be on host if CUDA is enabled
+        virtual bool ConvergeError(std::complex<T>* flat_old, std::complex<T>* flat_new, T* flat_error, uint64_t m, uint64_t n, uint64_t l = 1, uint64_t batch_size = 1) = 0;
 
         virtual bool Memcpy(void* dst, void* src, uint64_t bytes) = 0;
         

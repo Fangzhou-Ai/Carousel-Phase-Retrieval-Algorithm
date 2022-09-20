@@ -42,6 +42,7 @@ bool CudaImpl<T>::Backward2D(std::complex<T>* flat_input)
     {
         cufftExecZ2Z(Dfti2DHandle_, (cuDoubleComplex*)flat_input, (cuDoubleComplex*)flat_input, CUFFT_INVERSE);
     }
+    Normalization(flat_input, m_ * n_, m_ * n_ * batch_);
     return true;
 }
 
@@ -70,6 +71,7 @@ bool CudaImpl<T>::Backward3D(std::complex<T>* flat_input)
     {
         cufftExecZ2Z(Dfti3DHandle_, (cuDoubleComplex*)flat_input, (cuDoubleComplex*)flat_input, CUFFT_INVERSE);
     }
+    Normalization(flat_input, m_ * n_ * l_, m_ * n_* l_ * batch_);
     return true;
 }
 
@@ -132,5 +134,36 @@ bool CudaImpl<T>::Normalization(std::complex<T>* flat_src, T norm, uint64_t num)
     ((thrust::complex<T>*)flat_src, norm, num);
     return true;
 }
+template<typename T>
+bool CudaImpl<T>:: ConvergeError(std::complex<T>* flat_old, 
+                                 std::complex<T>* flat_new,
+                                 T* flat_error,
+                                 uint64_t m, uint64_t n, uint64_t l, uint64_t batch_size)
+{
+    MergeAddData(flat_new, flat_old, 1, -1, m * n * l * batch_size);
+    T TErr = 0;
+    if constexpr(std::is_same_v<T, float>)
+    {
+        for(auto i = 0; i < batch_size; i++)
+        {
+            CPRA_CUBLAS_CALL(cublasScnrm2(cuBlasHandle, m * n, reinterpret_cast<cuComplex*>(flat_old) + i * m * n * l, 1, flat_error + i));
+            CPRA_CUBLAS_CALL(cublasScnrm2(cuBlasHandle, m * n, reinterpret_cast<cuComplex*>(flat_new) + i * m * n * l, 1, &TErr));
+            flat_error[i] /= TErr;
+        }
+    }
+    else
+    {
+        for(auto i = 0; i < batch_size; i++)
+        {
+            CPRA_CUBLAS_CALL(cublasDznrm2(cuBlasHandle, m * n, reinterpret_cast<cuDoubleComplex*>(flat_old) + i * m * n * l, 1, flat_error + i));
+            CPRA_CUBLAS_CALL(cublasDznrm2(cuBlasHandle, m * n, reinterpret_cast<cuDoubleComplex*>(flat_new) + i * m * n * l, 1, &TErr));
+			flat_error[i] /= TErr;
+        }
+    }
+    return true;
+}
+
+
+
 
 }

@@ -146,6 +146,11 @@ class MklImpl final : public CpraImpl<T>
 
         bool Complex2DTo3DInterpolation(std::complex<T>* flat_2d_src, std::complex<T>* flat_3D_dst, T* angles, uint64_t m, uint64_t n, uint64_t p, uint64_t l) override {};
 
+        bool ConvergeError(std::complex<T>* flat_old, std::complex<T>* flat_new, T* flat_error, uint64_t m, uint64_t n, uint64_t l = 1, uint64_t batch_size = 1) override
+        {
+            return true;
+        }
+
         bool Memcpy(void* dst, void* src, uint64_t bytes) override
         {
             std::memcpy(dst, src, bytes);

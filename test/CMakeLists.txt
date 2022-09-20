@@ -24,6 +24,7 @@ if(HAS_CUDA)
         CUDA::cudart  
         CUDA::curand
         CUDA::cufft
+        CUDA::cublas
     )
     gtest_discover_tests(unitest_cuda)
 endif()

@@ -41,7 +41,7 @@ class Cpra
         {
             for(auto i = 0; i < num; i++)
             {
-                flat_src[i] = flat_dst[i].real();
+                flat_dst[i] = flat_src[i].real();
             }
             return true;
         }

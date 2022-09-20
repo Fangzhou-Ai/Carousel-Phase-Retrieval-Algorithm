@@ -18,7 +18,7 @@ __global__ void ker_SpaceConstraint(thrust::complex<T>* flat_src_data, T* flat_c
     for(uint64_t i = cg::this_grid().thread_rank(); i < num; i+= cg::this_grid().size())
     {
         flat_src_data[i].imag(0);
-        if(flat_constr_data[i % (num / batch_size)] == 0)
+        if(flat_constr_data[i % (num / batch_size)] < 0.9 || flat_src_data[i].real() < 0)
             flat_src_data[i].real(0);
     }
 }

@@ -77,7 +77,7 @@ bool MklImpl<T>::SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr_
     for(uint64_t i = 0; i < num; i++)
     {
         flat_src_data[i].imag(0);
-        if(flat_constr_data[i % (num / batch_size)] == 0)
+        if(flat_constr_data[i % (num / batch_size)] < 0.9)
             flat_src_data[i].real(0);
     }
     return true;
