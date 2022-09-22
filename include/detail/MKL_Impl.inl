@@ -99,9 +99,7 @@ bool MklImpl<T>::DataConstraint(std::complex<T>* flat_src_data, T* flat_constr_d
             // therefore we set 0 intensity pixel as unconstraint
             continue;
         }
-        if(std::norm(flat_src_data[i]) == 0)
-            flat_src_data[i].real(flat_constr_data[i % (num / batch_size)]);
-        else
+        if(std::norm(flat_src_data[i]) > 0)
             flat_src_data[i] = std::polar(flat_constr_data[i % (num / batch_size)], std::arg(flat_src_data[i]));
     }
     return true;

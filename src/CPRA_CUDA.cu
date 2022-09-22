@@ -120,25 +120,26 @@ std::pair<std::complex<T>*, T*> ShrinkWrap_CPRA_CUDA_Sample(int M, int N, int L,
                     compute.impl_->ConvergeError(old_record, t_random_guess_1, error + BATCHSIZE_CPRA * p, M, N, 1, BATCHSIZE_CPRA);
                 }
             }
-
-            for(auto p = 0; p < P; p++)
-            {
-                // Finishing reconstruction
-                compute.impl_->Memcpy((void*)t_random_guess_1,
-                                      (void*)(random_guess + M * N * BATCHSIZE_CPRA * p),
-                                      sizeof(std::complex<T>) * M * N * BATCHSIZE_CPRA);
-                compute.impl_->Forward2D(t_random_guess_1);
-                compute.impl_->DataConstraint(t_random_guess_1, dataConstr + M * N * p, M * N * BATCHSIZE_CPRA, BATCHSIZE_CPRA);
-                compute.impl_->Backward2D(t_random_guess_1);
-                compute.impl_->MergeAddData(random_guess + M * N * BATCHSIZE_CPRA * p, t_random_guess_1, -1.0 / Beta, 1.0 + 1.0 / Beta, M * N * BATCHSIZE_CPRA);
-                compute.impl_->SpaceConstraint(t_random_guess_1, spaceConstr + M * N * p, M * N * BATCHSIZE_CPRA, BATCHSIZE_CPRA);
-                compute.impl_->Memcpy((void*)(random_guess + M * N * BATCHSIZE_CPRA * p),
-                                      (void*)t_random_guess_1,
-                                      sizeof(std::complex<T>) * M * N * BATCHSIZE_CPRA);
-            }
-            
         }
     }
+
+    for(auto p = 0; p < P; p++)
+    {
+        // Finishing reconstruction
+        compute.impl_->Memcpy((void*)t_random_guess_1,
+                                (void*)(random_guess + M * N * BATCHSIZE_CPRA * p),
+                                sizeof(std::complex<T>) * M * N * BATCHSIZE_CPRA);
+        compute.impl_->Forward2D(t_random_guess_1);
+        compute.impl_->DataConstraint(t_random_guess_1, dataConstr + M * N * p, M * N * BATCHSIZE_CPRA, BATCHSIZE_CPRA);
+        compute.impl_->Backward2D(t_random_guess_1);
+        compute.impl_->MergeAddData(random_guess + M * N * BATCHSIZE_CPRA * p, t_random_guess_1, -1.0 / Beta, 1.0 + 1.0 / Beta, M * N * BATCHSIZE_CPRA);
+        compute.impl_->SpaceConstraint(t_random_guess_1, spaceConstr + M * N * p, M * N * BATCHSIZE_CPRA, BATCHSIZE_CPRA);
+        compute.impl_->Memcpy((void*)(random_guess + M * N * BATCHSIZE_CPRA * p),
+                                (void*)t_random_guess_1,
+                                sizeof(std::complex<T>) * M * N * BATCHSIZE_CPRA);
+    }
+
+
     compute.impl_->Sync();
     end = std::chrono::system_clock::now();
     std::chrono::duration<float> elapsed_seconds = end - start;
