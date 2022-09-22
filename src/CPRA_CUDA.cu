@@ -10,7 +10,7 @@
 template<typename T>
 std::pair<std::complex<T>*, T*> ShrinkWrap_CPRA_CUDA_Sample(int M, int N, int L, int P, int BATCHSIZE_CPRA, 
                                                                 T* dataConstr, T* spaceConstr, 
-                                                                int epi, int iter, T Beta = 0.9)
+                                                                int epi, int iter, int pre_iter = 1000, T Beta = 0.9)
 {
     // 2D part test
     // Shrinkwrap
@@ -34,7 +34,7 @@ std::pair<std::complex<T>*, T*> ShrinkWrap_CPRA_CUDA_Sample(int M, int N, int L,
     // Shrinkwrap algo
     compute.impl_->Memcpy((void*)(t_random_guess_1), (void*)(random_guess), sizeof(std::complex<T>) * M * N * BATCHSIZE_CPRA);
     compute.impl_->Memcpy((void*)(t_random_guess_2), (void*)(random_guess), sizeof(std::complex<T>) * M * N * BATCHSIZE_CPRA);
-    for(auto i = 0; i < 1000; i++)
+    for(auto i = 0; i < pre_iter; i++)
     {
         // Part 1
         compute.impl_->Forward2D(t_random_guess_1);
@@ -153,9 +153,6 @@ std::pair<std::complex<T>*, T*> ShrinkWrap_CPRA_CUDA_Sample(int M, int N, int L,
     return std::make_pair(random_guess, error);
 }
 
-// Tune it by yourself if needed
-#define TOTAL_BATCH 100
-
 int main(int argc, const char* argv[])
 {
     CPRA::Parser parser;
@@ -173,10 +170,11 @@ int main(int argc, const char* argv[])
     {
         throw std::runtime_error("Read file " + parser.getSpaceConstr() + " failed!");
     }
-    int N = std::max(parser.getBatch(), TOTAL_BATCH);
+    uint64_t N = std::max(parser.getBatch(), parser.getTotal());
     int cnt = N;
-    float* real_rec_projected_objects = (float*)obj.allocate(sizeof(float) * parser.getM() * parser.getN() * parser.getP() * N);
-    float* errors = (float*)obj.allocate(sizeof(float) * parser.getP() * N);
+    int fileCnt = 0; // count file name index
+    float* per_real_rec_projected_object = (float*)obj.allocate(sizeof(float) * parser.getM() * parser.getN() * parser.getP());
+    float* per_error = (float*)obj.allocate(sizeof(float) * parser.getP());
     while(true)
     {
         int n = std::min(cnt, parser.getBatch());
@@ -190,6 +188,7 @@ int main(int argc, const char* argv[])
                                                         spaceConstr,
                                                         parser.getEpi(),
                                                         parser.getIter(),
+                                                        parser.getPreIter(),
                                                         parser.getBeta()
                                                         );
         auto rec_projected_object = results.first;
@@ -198,16 +197,24 @@ int main(int argc, const char* argv[])
         float* real_rec_projected_object = (float*)obj.allocate(sizeof(float) * num);
         obj.ComplexToReal(rec_projected_object, real_rec_projected_object, num);
         uint64_t start = N - cnt;
-        // Copy data to buffer
-        for(uint64_t i = 0; i < parser.getP(); i++)
+        // Write data
+        for(uint64_t i = 0; i < n; i++)
         {
-            // copy object
-            obj.impl_->Memcpy(real_rec_projected_objects + (i * TOTAL_BATCH + start) * parser.getM() * parser.getN(),
-                              real_rec_projected_object + (i * n) * parser.getM() * parser.getN(),
-                              sizeof(float) * parser.getM() * parser.getN() * n);
-            obj.impl_->Memcpy(errors + i * TOTAL_BATCH + start,
-                              error + i * n,
-                              sizeof(float) * n);
+            for(uint64_t p = 0; p < parser.getP(); p++)
+            {
+                per_error[p] = error[i * parser.getP() + p];
+                obj.impl_->Memcpy(per_real_rec_projected_object + parser.getM() * parser.getN() * p,
+                                  real_rec_projected_object + (i * parser.getP() + p) * parser.getM() * parser.getN(),
+                                  sizeof(float) * parser.getM() * parser.getN());
+                    
+            }
+            obj.WriteMatrixToFile(parser.getOutputReconstr()+"."+std::to_string(fileCnt),
+                                  per_real_rec_projected_object,
+                                  parser.getM() * parser.getN() * parser.getP(), 1, 1);
+            obj.WriteMatrixToFile(parser.getOutputError()+"."+std::to_string(fileCnt),
+                                  per_error,
+                                  sizeof(float) * parser.getP(), 1, 1);
+            fileCnt++;
         }
 
         obj.deallocate(rec_projected_object);
@@ -217,13 +224,10 @@ int main(int argc, const char* argv[])
         cnt -= n;
         if(cnt <= 0) break;  
     }
-    //write file
-    obj.WriteMatrixToFile(parser.getOutputReconstr(), real_rec_projected_objects, parser.getM() * parser.getN() * parser.getP() * N, 1, 1);
-    obj.WriteMatrixToFile(parser.getOutputError(), errors, parser.getP() * N, 1, 1);
     // free memory
+    obj.deallocate(per_real_rec_projected_object);
+    obj.deallocate(per_error);
     obj.deallocate(dataConstr);
     obj.deallocate(spaceConstr);
-    obj.deallocate(real_rec_projected_objects);
-    obj.deallocate(errors);
     return EXIT_SUCCESS;
 }

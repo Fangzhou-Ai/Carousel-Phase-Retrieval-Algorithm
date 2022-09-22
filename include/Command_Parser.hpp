@@ -26,7 +26,9 @@ class Parser
                 ("P,p", po::value<int>(&P)->default_value(90), "set number of projected objects")
                 ("epi,e", po::value<int>(&Epi)->default_value(1), "set number of episodes")
                 ("iter,i", po::value<int>(&Iter)->default_value(1), "set number of iterations within each episodes")
+                ("preit", po::value<int>(&PreIter)->default_value(1000), "set number of iterations for pre-reconstruction")
                 ("Batch", po::value<int>(&Batch)->default_value(1), "set batch size")
+                ("Total", po::value<int>(&Total)->default_value(100), "Total batch size")
                 ("Beta", po::value<float>(&Beta)->default_value(0.9), "set shrinkwrap beta value")
                 ("data_constraint,d", po::value<std::string>(&data_constraint)->default_value("./data_constraint.bin"), "Data Constraint file")
                 ("space_constraint,s", po::value<std::string>(&space_constraint)->default_value("./space_constraint.bin"), "Space Constraint file")
@@ -67,7 +69,9 @@ class Parser
         int getP(){return P;}
         int getEpi(){return Epi;}
         int getIter(){return Iter;}
+        int getPreIter(){return PreIter;}
         int getBatch(){return Batch;}
+        int getTotal(){return Total;}
         float getBeta(){return Beta;}
         std::string getDataConstr(){return data_constraint;}
         std::string getSpaceConstr(){return space_constraint;}
@@ -77,7 +81,7 @@ class Parser
     private:
         po::options_description desc_;
         // Parameters
-        int M, N, L, P, Epi, Iter, Batch;
+        int M, N, L, P, Epi, Iter, PreIter, Batch, Total;
         float Beta;
         std::string data_constraint, space_constraint, output_reconstruction, output_error;
 };
