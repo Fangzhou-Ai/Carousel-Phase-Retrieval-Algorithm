@@ -27,7 +27,7 @@ std::pair<std::complex<T>*, T*> ShrinkWrap_CPRA_CUDA_Sample(int M, int N, int L,
 
     // For error control
     std::complex<T>* old_record = (std::complex<T>*)compute.allocate(sizeof(std::complex<T>) * M * N * BATCHSIZE_CPRA);
-    T* errors = (T*)compute.allocate(sizeof(T) * P * BATCHSIZE_CPRA);
+    T* error = (T*)compute.allocate(sizeof(T) * P * BATCHSIZE_CPRA);
 
     // Step A, pre-reconstruct
     // Num of iteration here is fixed at 1000
@@ -117,7 +117,7 @@ std::pair<std::complex<T>*, T*> ShrinkWrap_CPRA_CUDA_Sample(int M, int N, int L,
                                           sizeof(std::complex<T>) * M * N * BATCHSIZE_CPRA);
                     compute.impl_->Forward2D(old_record);
                     compute.impl_->Forward2D(t_random_guess_1);
-                    compute.impl_->ConvergeError(old_record, t_random_guess_1, errors + BATCHSIZE_CPRA * p, M, N, 1, BATCHSIZE_CPRA);
+                    compute.impl_->ConvergeError(old_record, t_random_guess_1, error + BATCHSIZE_CPRA * p, M, N, 1, BATCHSIZE_CPRA);
                 }
             }
 
@@ -141,7 +141,7 @@ std::pair<std::complex<T>*, T*> ShrinkWrap_CPRA_CUDA_Sample(int M, int N, int L,
     }
     compute.impl_->Sync();
     end = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::chrono::duration<float> elapsed_seconds = end - start;
     std::time_t end_time = std::chrono::system_clock::to_time_t(end);
     std::cout << "Finished computation at " << std::ctime(&end_time)
               << "elapsed time: " << elapsed_seconds.count() << "s\n";
@@ -149,8 +149,11 @@ std::pair<std::complex<T>*, T*> ShrinkWrap_CPRA_CUDA_Sample(int M, int N, int L,
     compute.deallocate(t_random_guess_1);
     compute.deallocate(t_random_guess_2);
     compute.deallocate(old_record);
-    return std::make_pair(random_guess, errors);
+    return std::make_pair(random_guess, error);
 }
+
+// Tune it by yourself if needed
+#define TOTAL_BATCH 100
 
 int main(int argc, const char* argv[])
 {
@@ -169,29 +172,57 @@ int main(int argc, const char* argv[])
     {
         throw std::runtime_error("Read file " + parser.getSpaceConstr() + " failed!");
     }
+    int N = std::max(parser.getBatch(), TOTAL_BATCH);
+    int cnt = N;
+    float* real_rec_projected_objects = (float*)obj.allocate(sizeof(float) * parser.getM() * parser.getN() * parser.getP() * N);
+    float* errors = (float*)obj.allocate(sizeof(float) * parser.getP() * N);
+    while(true)
+    {
+        int n = std::min(cnt, parser.getBatch());
+        std::cout << "Reconstrucint batch size " << n << ". Total batch left " << cnt << "." << std::endl;
+        auto results = ShrinkWrap_CPRA_CUDA_Sample<float>(parser.getM(),
+                                                        parser.getN(),
+                                                        parser.getL(),
+                                                        parser.getP(),
+                                                        n,
+                                                        dataConstr,
+                                                        spaceConstr,
+                                                        parser.getEpi(),
+                                                        parser.getIter(),
+                                                        parser.getBeta()
+                                                        );
+        auto rec_projected_object = results.first;
+        auto error = results.second;
+        uint64_t num = parser.getM() * parser.getN() * parser.getP() * n;
+        float* real_rec_projected_object = (float*)obj.allocate(sizeof(float) * num);
+        obj.ComplexToReal(rec_projected_object, real_rec_projected_object, num);
+        int start = N - cnt;
+        // Copy data to buffer
+        for(auto i = 0; i < parser.getP(); i++)
+        {
+            // copy object
+            obj.impl_->Memcpy(real_rec_projected_objects + (i * TOTAL_BATCH + start) * parser.getM() * parser.getN(),
+                              real_rec_projected_object + (i * n) * parser.getM() * parser.getN(),
+                              sizeof(float) * parser.getM() * parser.getN() * n);
+            obj.impl_->Memcpy(errors + i * TOTAL_BATCH + start,
+                              error + i * n,
+                              sizeof(float) * n);
+        }
 
-    auto results = ShrinkWrap_CPRA_CUDA_Sample<float>(parser.getM(),
-                                                      parser.getN(),
-                                                      parser.getL(),
-                                                      parser.getP(),
-                                                      parser.getBatch(),
-                                                      dataConstr,
-                                                      spaceConstr,
-                                                      parser.getEpi(),
-                                                      parser.getIter(),
-                                                      parser.getBeta()
-                                                    );
-    auto rec_projected_objects = results.first;
-    auto errors = results.second;
-    uint64_t num = parser.getM() * parser.getN() * parser.getP() * parser.getBatch();
-    float* real_rec_projected_objects = (float*)obj.allocate(sizeof(float) * num);
-    obj.ComplexToReal(rec_projected_objects, real_rec_projected_objects, num);
-    obj.WriteMatrixToFile(parser.getOutputReconstr(), real_rec_projected_objects, num, 1, 1);
-    obj.WriteMatrixToFile(parser.getOutputError(), errors, parser.getP() * parser.getBatch(), 1, 1);
+        obj.deallocate(rec_projected_object);
+        obj.deallocate(real_rec_projected_object);
+        obj.deallocate(error);
+
+        cnt -= n;
+        if(cnt <= 0) break;  
+    }
+    //write file
+    obj.WriteMatrixToFile(parser.getOutputReconstr(), real_rec_projected_objects, parser.getM() * parser.getN() * parser.getP() * N, 1, 1);
+    obj.WriteMatrixToFile(parser.getOutputError(), errors, parser.getP() * N, 1, 1);
     // free memory
     obj.deallocate(dataConstr);
     obj.deallocate(spaceConstr);
-    obj.deallocate(rec_projected_objects);
+    obj.deallocate(real_rec_projected_objects);
     obj.deallocate(errors);
     return EXIT_SUCCESS;
 }
