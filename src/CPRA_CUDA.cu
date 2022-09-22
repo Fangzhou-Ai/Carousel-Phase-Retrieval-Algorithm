@@ -197,9 +197,9 @@ int main(int argc, const char* argv[])
         uint64_t num = parser.getM() * parser.getN() * parser.getP() * n;
         float* real_rec_projected_object = (float*)obj.allocate(sizeof(float) * num);
         obj.ComplexToReal(rec_projected_object, real_rec_projected_object, num);
-        int start = N - cnt;
+        uint64_t start = N - cnt;
         // Copy data to buffer
-        for(auto i = 0; i < parser.getP(); i++)
+        for(uint64_t i = 0; i < parser.getP(); i++)
         {
             // copy object
             obj.impl_->Memcpy(real_rec_projected_objects + (i * TOTAL_BATCH + start) * parser.getM() * parser.getN(),
