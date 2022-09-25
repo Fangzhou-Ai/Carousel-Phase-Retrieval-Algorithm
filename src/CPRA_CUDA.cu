@@ -172,7 +172,7 @@ int main(int argc, const char* argv[])
     }
     uint64_t N = std::max(parser.getBatch(), parser.getTotal());
     int cnt = N;
-    int fileCnt = 0; // count file name index
+    int fileCnt = 1; // count file name index
     float* per_real_rec_projected_object = (float*)obj.allocate(sizeof(float) * parser.getM() * parser.getN() * parser.getP());
     float* per_error = (float*)obj.allocate(sizeof(float) * parser.getP());
     while(true)

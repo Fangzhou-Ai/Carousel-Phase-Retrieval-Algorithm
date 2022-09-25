@@ -36,6 +36,25 @@ if(HAS_CUDA)
                        --generate-line-info
                        --use_fast_math
                        >)
+
+    add_executable(
+    CONV_CUDA
+    CONV_CUDA.cu
+        )
+    target_link_libraries(
+        CONV_CUDA 
+        PRIVATE 
+        CUDA::cudart  
+        CUDA::curand
+        CUDA::cufft
+        CUDA::cublas
+        ${Boost_LIBRARIES}
+    )
+    target_compile_options(CONV_CUDA PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
+                        --generate-line-info
+                        --use_fast_math
+                        >)
+
 endif()
 
 if(HAS_MKL)
