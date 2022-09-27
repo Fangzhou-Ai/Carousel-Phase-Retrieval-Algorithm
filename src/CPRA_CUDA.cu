@@ -202,11 +202,10 @@ int main(int argc, const char* argv[])
         {
             for(uint64_t p = 0; p < parser.getP(); p++)
             {
-                per_error[p] = error[i * parser.getP() + p];
+                per_error[p] = error[p * n + i];
                 obj.impl_->Memcpy(per_real_rec_projected_object + parser.getM() * parser.getN() * p,
-                                  real_rec_projected_object + (i * parser.getP() + p) * parser.getM() * parser.getN(),
-                                  sizeof(float) * parser.getM() * parser.getN());
-                    
+                                  real_rec_projected_object + (p * n + i) * parser.getM() * parser.getN(),
+                                  sizeof(float) * parser.getM() * parser.getN());  
             }
             obj.WriteMatrixToFile(parser.getOutputReconstr()+"."+std::to_string(fileCnt),
                                   per_real_rec_projected_object,
