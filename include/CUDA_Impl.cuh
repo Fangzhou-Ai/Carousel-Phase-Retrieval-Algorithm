@@ -79,7 +79,9 @@ class CudaImpl final : public CpraImpl<T>
         // param:
         // p : number of 2D sources
         // m, n, l: 3 dimensions
-        // To interpolate real value, cast it to complex first
+        
+        bool Real2DTo3DInterpolation(T* flat_2d_src, T* flat_3D_dst, T* angles, uint64_t m, uint64_t n, uint64_t p, uint64_t l) override;
+
         bool Complex2DTo3DInterpolation(std::complex<T>* flat_2d_src, std::complex<T>* flat_3D_dst, T* angles, uint64_t m, uint64_t n, uint64_t p, uint64_t l) override {return true;}
 
         bool ConvergeError(std::complex<T>* flat_old, std::complex<T>* flat_new, T* flat_error, uint64_t m, uint64_t n, uint64_t l = 1, uint64_t batch_size = 1) override;

@@ -78,10 +78,10 @@ bool CudaImpl<T>::Backward3D(std::complex<T>* flat_input)
 template<typename T>
 bool CudaImpl<T>::SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size)
 {
-    int block_size = 256;
-    int per_thread_data = 8;
-    int per_block_data = block_size * per_thread_data;
-    int grid_size = (num + per_block_data - 1) / per_block_data;
+    uint64_t block_size = 256;
+    uint64_t per_thread_data = 8;
+    uint64_t per_block_data = block_size * per_thread_data;
+    uint64_t grid_size = (num + per_block_data - 1) / per_block_data;
     Kernel::ker_SpaceConstraint<T><<<grid_size, block_size, 0, stream_>>>
     ((thrust::complex<T>*)flat_src_data, flat_constr_data, num, batch_size);
     return true;
@@ -90,10 +90,10 @@ bool CudaImpl<T>::SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr
 template<typename T>
 bool CudaImpl<T>::DataConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size)
 {
-    int block_size = 256;
-    int per_thread_data = 8;
-    int per_block_data = block_size * per_thread_data;
-    int grid_size = (num + per_block_data - 1) / per_block_data;
+    uint64_t block_size = 256;
+    uint64_t per_thread_data = 8;
+    uint64_t per_block_data = block_size * per_thread_data;
+    uint64_t grid_size = (num + per_block_data - 1) / per_block_data;
     Kernel::ker_DataConstraint<T><<<grid_size, block_size, 0, stream_>>>
     ((thrust::complex<T>*)flat_src_data, flat_constr_data, num, batch_size);
     return true;
@@ -102,10 +102,10 @@ bool CudaImpl<T>::DataConstraint(std::complex<T>* flat_src_data, T* flat_constr_
 template<typename T>
 bool CudaImpl<T>::DataConstraint(std::complex<T>* flat_src_data, std::complex<T>* flat_constr_data, uint64_t num, uint64_t batch_size)
 {
-    int block_size = 256;
-    int per_thread_data = 8;
-    int per_block_data = block_size * per_thread_data;
-    int grid_size = (num + per_block_data - 1) / per_block_data;
+    uint64_t block_size = 256;
+    uint64_t per_thread_data = 8;
+    uint64_t per_block_data = block_size * per_thread_data;
+    uint64_t grid_size = (num + per_block_data - 1) / per_block_data;
     Kernel::ker_DataConstraint<T><<<grid_size, block_size, 0, stream_>>>
     ((thrust::complex<T>*)flat_src_data, (thrust::complex<T>*)flat_constr_data, num, batch_size);
     return true;
@@ -114,10 +114,10 @@ bool CudaImpl<T>::DataConstraint(std::complex<T>* flat_src_data, std::complex<T>
 template<typename T>
 bool CudaImpl<T>::MergeAddData(std::complex<T>* flat_src, std::complex<T>* flat_dst, T alpha, T beta, uint64_t num)
 {
-    int block_size = 256;
-    int per_thread_data = 8;
-    int per_block_data = block_size * per_thread_data;
-    int grid_size = (num + per_block_data - 1) / per_block_data;
+    uint64_t block_size = 256;
+    uint64_t per_thread_data = 8;
+    uint64_t per_block_data = block_size * per_thread_data;
+    uint64_t grid_size = (num + per_block_data - 1) / per_block_data;
     Kernel::ker_MergeAddData<T><<<grid_size, block_size, 0, stream_>>>
     ((thrust::complex<T>*)flat_src, (thrust::complex<T>*)flat_dst, alpha, beta, num);
     return true;
@@ -126,10 +126,10 @@ bool CudaImpl<T>::MergeAddData(std::complex<T>* flat_src, std::complex<T>* flat_
 template<typename T>
 bool CudaImpl<T>::Normalization(std::complex<T>* flat_src, T norm, uint64_t num)
 {
-    int block_size = 256;
-    int per_thread_data = 8;
-    int per_block_data = block_size * per_thread_data;
-    int grid_size = (num + per_block_data - 1) / per_block_data;
+    uint64_t block_size = 256;
+    uint64_t per_thread_data = 8;
+    uint64_t per_block_data = block_size * per_thread_data;
+    uint64_t grid_size = (num + per_block_data - 1) / per_block_data;
     Kernel::ker_Normalization<T><<<grid_size, block_size, 0, stream_>>>
     ((thrust::complex<T>*)flat_src, norm, num);
     return true;
@@ -163,7 +163,29 @@ bool CudaImpl<T>:: ConvergeError(std::complex<T>* flat_old,
     return true;
 }
 
+template<typename T>
+bool CudaImpl<T>::Real2DTo3DInterpolation(T* flat_2d_src, T* flat_3d_dst, T* angles, uint64_t m, uint64_t n, uint64_t p, uint64_t l)
+{
+    // Rotate around a flix axis, euler angle is not supported now
+	// in this case it's rotating around y axis, from +z to +x to -z
+    T* flat_weight;
+    CPRA_CUDA_TRY(cudaMallocManaged((void**) & flat_weight, sizeof(T) * m * n * l));
+    CPRA_CUDA_TRY(cudaMemsetAsync(flat_weight, 0, sizeof(T) * m * n * l));
+    
+    uint64_t block_size = 256;
+    uint64_t per_thread_data = 8;
+    uint64_t per_block_data = block_size * per_thread_data;
+    uint64_t grid_size = (m * n * p + per_block_data - 1) / per_block_data;
+    Kernel::ker_Real2DTo3DInterpolation<T><<<grid_size, block_size, 0, stream_>>>
+    (flat_2d_src, flat_3d_dst, angles, flat_weight, m, n, p, l);
+    
+    grid_size = (m * n * l + per_block_data - 1) / per_block_data;
+    Kernel::ker_NormRealInterpolation<T><<<grid_size, block_size, 0, stream_>>>
+    (flat_3d_dst, flat_weight, m * n * l);
 
+    CPRA_CUDA_TRY(cudaFree(flat_weight));
+    return true;
+}
 
 
 }
