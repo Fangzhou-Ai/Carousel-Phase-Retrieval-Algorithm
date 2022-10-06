@@ -21,16 +21,16 @@ int main(int argc, const char* argv[])
         throw std::runtime_error("Read file " + parser.getDataConstr() + " failed!");
     }
     float* flat_3d_dst = (float*)obj.allocate(sizeof(float) * parser.getM() * parser.getN() * parser.getL());
-    CPRA_CUDA_TRY(cudaMemset(flat_3d_dst, 0, sizeof(float) * parser.getM() * parser.getN() * parser.getL()));
 
     thrust::host_vector<float> h_angles(parser.getP());
     for(int i = 0; i < parser.getP(); i++)
     {
-        h_angles[i] = i * PI / parser.getP();
+        h_angles[i] = i * PI / (parser.getP() - 1);
     }
     thrust::device_vector<float> angles = h_angles;
     auto angles_ptr = thrust::raw_pointer_cast(angles.data());
     obj.impl_->Real2DTo3DInterpolation(flat_2d_src, flat_3d_dst, angles_ptr, parser.getM(), parser.getN(), parser.getP(), parser.getL());
+    obj.WriteMatrixToFile(parser.getOutputReconstr(), flat_3d_dst, parser.getM() * parser.getN() * parser.getL(), 1, 1);
     obj.deallocate(flat_2d_src);
     obj.deallocate(flat_3d_dst);
     return EXIT_SUCCESS;

@@ -64,17 +64,17 @@ __global__ void ker_Normalization(thrust::complex<T>* flat_src, T norm, uint64_t
 }
 
 template <typename T>
-__global__ void ker_Real2DTo3DInterpolation(T* flat_2d_src, T* flat_3d_dst, T* angles, T* flat_weight, uint64_t m, uint64_t n, uint64_t p, uint64_t l)
+__global__ void ker_Real2DTo3DInterpolation(T* flat_2d_src, T* flat_3d_dst, T* angles, T* flat_weight, uint64_t M, uint64_t N, uint64_t P, uint64_t L)
 {
-    for(uint64_t i = cg::this_grid().thread_rank(); i < m * n * p; i+= cg::this_grid().size())
+    for(uint64_t i = cg::this_grid().thread_rank(); i < M * N * P; i+= cg::this_grid().size())
     {
         //in 2D slices coordinate, follow Matlab convention
-        int zIn = i / (m * n);
-        int xIn = (i - m * n * zIn) / m;
-        int yIn = (i - m * n * zIn) - m * xIn;
+        int zIn = i / (M * N);
+        int xIn = (i - M * N * zIn) / M;
+        int yIn = (i - M * N * zIn) - M * xIn;
         //convert to 3D Euclidean space coordinate
-        T xReal = (T)xIn - (T)n / 2.0;
-        T yReal = (T)-yIn + (T)m / 2.0;
+        T xReal = (T)xIn - (T)N / 2.0;
+        T yReal = (T)-yIn + (T)M / 2.0;
         T ang = angles[zIn];
         T x3D = yReal * sin(ang);
         T y3D = xReal;
@@ -84,12 +84,12 @@ __global__ void ker_Real2DTo3DInterpolation(T* flat_2d_src, T* flat_3d_dst, T* a
         int k = round(y3D);
         int l = round(z3D);
         //convert to 3D matrix coordinate
-        int z = l / 2 - j;
-        int x = n / 2 + k;
-        int y = m / 2 - l;
-        int index = z * m * n + x * m + y;
+        int z = L / 2 - j;
+        int x = N / 2 + k;
+        int y = M / 2 - l;
+        int index = z * M * N + x * M + y;
         distance = sqrt(pow(x3D - j, 2) + pow(y3D - k, 2) + pow(z3D - l, 2));
-        if (index >= m * n * l || index < 0 || distance >= 0.5)
+        if (index >= M * N * L || index < 0 || distance >= 0.5)
             return;
 
         if (abs(distance) <= 0.02)

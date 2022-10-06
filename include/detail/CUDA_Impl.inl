@@ -170,7 +170,8 @@ bool CudaImpl<T>::Real2DTo3DInterpolation(T* flat_2d_src, T* flat_3d_dst, T* ang
 	// in this case it's rotating around y axis, from +z to +x to -z
     T* flat_weight;
     CPRA_CUDA_TRY(cudaMallocManaged((void**) & flat_weight, sizeof(T) * m * n * l));
-    CPRA_CUDA_TRY(cudaMemsetAsync(flat_weight, 0, sizeof(T) * m * n * l));
+    CPRA_CUDA_TRY(cudaMemsetAsync(flat_3d_dst, 0, sizeof(T) * m * n * l, stream_));
+    CPRA_CUDA_TRY(cudaMemsetAsync(flat_weight, 0, sizeof(T) * m * n * l, stream_));
     
     uint64_t block_size = 256;
     uint64_t per_thread_data = 8;
