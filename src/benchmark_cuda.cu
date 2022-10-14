@@ -4,11 +4,11 @@
 #include "../include/CPRA.hpp"
 
 
-static constexpr uint64_t M  = 256;
-static constexpr uint64_t N = 256;
-static constexpr uint64_t P = 128;
-static constexpr uint64_t L = 256;
-static constexpr uint64_t BATCHSIZE_CPRA = 16;
+static constexpr uint64_t M  = 1024;
+static constexpr uint64_t N = 1024;
+static constexpr uint64_t P = 576;
+static constexpr uint64_t L = 1024;
+static constexpr uint64_t BATCHSIZE_CPRA = 1;
 static constexpr uint64_t BATCHSIZE_CONV = 1;
 static constexpr float BETA = 0.9;
 
@@ -160,8 +160,8 @@ void ShrinkWrap_CPRA_CUDA_Sample(int epi, int iter)
     std::cout << "Estimated step C elapsed time: " << elapsed_seconds.count() << "s\n";  
 
     // Step D, Reconstruct 3D object with complex phase
-    // Num of iteration here is fixed at 50
-    for(auto i = 0; i < 50; i++)
+    // Num of iteration here is fixed at 1
+    for(auto i = 0; i < 1; i++)
     {
         compute_3D.impl_->Forward3D(random_guess_3D);
         compute_3D.impl_->DataConstraint(random_guess_3D, complexDataConstr_3D, M * N * L, 1);

@@ -59,9 +59,13 @@ class CudaImpl final : public CpraImpl<T>
 
         bool Backward2D(std::complex<T>* flat_input) override;
 
+        bool FFTShift2D(std::complex<T>* flat_input, size_t M, size_t N, size_t Batch) override;
+
         bool Forward3D(std::complex<T>* flat_input) override;
 
         bool Backward3D(std::complex<T>* flat_input) override;
+
+        bool FFTShift3D(std::complex<T>* flat_input, size_t M, size_t N, size_t L, size_t Batch) override;
 
         bool SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size) override;
 

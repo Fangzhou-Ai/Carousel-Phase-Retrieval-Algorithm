@@ -127,9 +127,13 @@ class MklImpl final : public CpraImpl<T>
 
         bool Backward2D(std::complex<T>* flat_input) override;
 
+        bool FFTShift2D(std::complex<T>* flat_input, size_t M, size_t, size_t Batch) override{return true;}
+
         bool Forward3D(std::complex<T>* flat_input) override;
 
         bool Backward3D(std::complex<T>* flat_input) override;
+
+        bool FFTShift3D(std::complex<T>* flat_input, size_t M, size_t N, size_t L, size_t Batch) override{return true;}
 
         bool SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size) override;
 
@@ -144,7 +148,7 @@ class MklImpl final : public CpraImpl<T>
         // flat_src = flat_src ./ norm
         bool Normalization(std::complex<T>* flat_src, T norm, uint64_t num) override;
         
-        bool Real2DTo3DInterpolation(T* flat_2d_src, T* flat_3D_dst, T* angles, uint64_t m, uint64_t n, uint64_t p, uint64_t l) override (return true);
+        bool Real2DTo3DInterpolation(T* flat_2d_src, T* flat_3D_dst, T* angles, uint64_t m, uint64_t n, uint64_t p, uint64_t l) override {return true;}
         bool Complex2DTo3DInterpolation(std::complex<T>* flat_2d_src, std::complex<T>* flat_3D_dst, T* angles, uint64_t m, uint64_t n, uint64_t p, uint64_t l) override {return true;}
 
         bool ConvergeError(std::complex<T>* flat_old, std::complex<T>* flat_new, T* flat_error, uint64_t m, uint64_t n, uint64_t l = 1, uint64_t batch_size = 1) override

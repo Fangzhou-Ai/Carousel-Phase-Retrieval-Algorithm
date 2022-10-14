@@ -189,4 +189,17 @@ bool CudaImpl<T>::Real2DTo3DInterpolation(T* flat_2d_src, T* flat_3d_dst, T* ang
 }
 
 
+template<typename T>
+bool CudaImpl<T>::FFTShift2D(std::complex<T>* flat_input, size_t M, size_t N, size_t Batch)
+{
+    return true;
+}
+
+template<typename T>
+bool CudaImpl<T>::FFTShift3D(std::complex<T>* flat_input, size_t M, size_t N, size_t L, size_t Batch)
+{
+    return true;
+}
+
+
 }

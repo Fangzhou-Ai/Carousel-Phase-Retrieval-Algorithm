@@ -26,9 +26,13 @@ class CpraImpl
 
         virtual bool Backward2D(std::complex<T>* flat_input) = 0;
 
+        virtual bool FFTShift2D(std::complex<T>* flat_input, size_t M, size_t N, size_t Batch) = 0;
+
         virtual bool Forward3D(std::complex<T>* flat_input) = 0;
 
         virtual bool Backward3D(std::complex<T>* flat_input) = 0;
+
+        virtual bool FFTShift3D(std::complex<T>* flat_input, size_t M, size_t N, size_t L, size_t Batch) = 0;
 
         virtual bool SpaceConstraint(std::complex<T>* flat_src_data, T* flat_constr_data, uint64_t num, uint64_t batch_size) = 0;
         // Real data constraint
