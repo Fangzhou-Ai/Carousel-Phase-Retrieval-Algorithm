@@ -128,46 +128,129 @@ bool MklImpl<T>::DataConstraint(std::complex<T>* flat_src_data, std::complex<T>*
 template<typename T>
 bool MklImpl<T>::Forward2D(std::complex<T>* flat_input)
 { 
+    FFTShift2D(flat_input, m_, n_, batch_size_);
     status = DftiComputeForward(Dfti2DHandle_, flat_input);
     if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
     {
         printf("Error: %s\n", DftiErrorMessage(status));
     }
+    FFTShift2D(flat_input, m_, n_, batch_size_);
     return true;
 }
 
 template<typename T>
 bool MklImpl<T>::Backward2D(std::complex<T>* flat_input)
 {
+    FFTShift2D(flat_input, m_, n_, batch_size_);
     status = DftiComputeBackward(Dfti2DHandle_, flat_input);
     if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
     {
         printf("Error: %s\n", DftiErrorMessage(status));
     }
+    FFTShift2D(flat_input, m_, n_, batch_size_);
     return true;
 }
 
 template<typename T>
 bool MklImpl<T>::Forward3D(std::complex<T>* flat_input)
 {
+    FFTShift3D(flat_input, m_, n_, l_, batch_size_);
     status = DftiComputeForward(Dfti3DHandle_, flat_input);
     if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
     {
         printf("Error: %s\n", DftiErrorMessage(status));
     }
+    FFTShift3D(flat_input, m_, n_, l_, batch_size_);
     return true;
 }
 
 template<typename T>
 bool MklImpl<T>::Backward3D(std::complex<T>* flat_input)
 {
+    FFTShift3D(flat_input, m_, n_, l_, batch_size_);
     status = DftiComputeBackward(Dfti3DHandle_, flat_input);
     if (status && !DftiErrorClass(status, DFTI_NO_ERROR))
     {
         printf("Error: %s\n", DftiErrorMessage(status));
     }
+    FFTShift3D(flat_input, m_, n_, l_, batch_size_);
     return true;
 }
+
+template<typename T>
+bool MklImpl<T>::FFTShift2D(std::complex<T>* flat_input, size_t M, size_t N, size_t Batch)
+{
+#ifdef HAS_OMP
+#pragma omp parallel for
+#endif
+    for(uint64_t i = 0; i < (uint64_t)M * N * Batch / 2; i++)
+    {
+        uint64_t bidx = i / ((uint64_t)M * N / 2);
+        uint64_t idx = i - bidx * M * N / 2;
+        size_t col = idx % N; // [0, N - 1]
+        size_t row = idx / N; // [0, M / 2 - 1]
+        uint64_t offset = bidx * M * N;
+        size_t crow = row + M / 2;
+        size_t ccol;
+        // which squard
+        if(col < N / 2)
+        {
+            // first quad to third quad
+            ccol = col + N / 2;  
+        }
+        else
+        {
+            // second quad to forth quard
+            ccol = col - N / 2;
+        }
+        std::swap(flat_input[crow * N + ccol + offset], flat_input[row * N + col + offset]);
+    }
+    return true;
+}
+
+
+template<typename T>
+bool MklImpl<T>::FFTShift3D(std::complex<T>* flat_input, size_t M, size_t N, size_t L, size_t Batch)
+{
+#ifdef HAS_OMP
+#pragma omp parallel for
+#endif
+    for(uint64_t i = 0; i < (uint64_t)M * N * L * Batch / 2; i++)
+    {
+        uint64_t bidx = i / ((uint64_t)M * N * L / 2);
+        uint64_t idx = i - bidx * M * N * L / 2;
+        size_t  dep = idx / (M * N);
+        idx = idx - dep * M * N;
+        size_t col = idx % N;
+        size_t row = idx / N;
+        auto offset  = bidx * M * N * L;
+        size_t cdep = dep + L / 2;
+        size_t crow;
+        size_t ccol;
+
+        if(row < M / 2)
+        {
+            crow = row + M / 2;
+        }
+        else
+        {
+            crow = row - M / 2;
+        }
+
+        if(col < N / 2)
+        {
+            ccol = col + N / 2;
+        }
+        else
+        {
+            ccol = col - N / 2;
+        }
+        std::swap(flat_input[cdep * M * N + crow * N + ccol + offset], flat_input[dep * M * N + row * N + col + offset]);
+    }
+    return true;
+}
+
+
 
 
 } // namespace CPRA

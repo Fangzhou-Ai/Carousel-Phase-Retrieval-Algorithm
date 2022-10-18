@@ -251,9 +251,11 @@ void ShrinkWrap_Conventional_MKL_Sample(int iter)
     return;
 }
 
+#include <omp.h>
 
 int main(int argc, char *argv[])
 {
+    omp_set_num_threads(8);
     if(argc == 3)
     {
         std::istringstream epi_ss(argv[1]);
