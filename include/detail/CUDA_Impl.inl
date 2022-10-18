@@ -20,6 +20,7 @@ bool CudaImpl<T>::Initialize(T* flat_data_ptr, uint64_t num)
 template<typename T>
 bool CudaImpl<T>::Forward2D(std::complex<T>* flat_input)
 {
+    FFTShift2D(flat_input, m_, n_, batch_);
     if constexpr (std::is_same_v<T, float>)
     {
         cufftExecC2C(Dfti2DHandle_, (cuComplex*)flat_input, (cuComplex*)flat_input, CUFFT_FORWARD);
@@ -28,12 +29,14 @@ bool CudaImpl<T>::Forward2D(std::complex<T>* flat_input)
     {
         cufftExecZ2Z(Dfti2DHandle_, (cuDoubleComplex*)flat_input, (cuDoubleComplex*)flat_input, CUFFT_FORWARD);
     }
+    FFTShift2D(flat_input, m_, n_, batch_);
     return true;
 }
 
 template<typename T>
 bool CudaImpl<T>::Backward2D(std::complex<T>* flat_input)
 {
+    FFTShift2D(flat_input, m_, n_, batch_);
     if constexpr (std::is_same_v<T, float>)
     {
         cufftExecC2C(Dfti2DHandle_, (cuComplex*)flat_input, (cuComplex*)flat_input, CUFFT_INVERSE);
@@ -42,6 +45,7 @@ bool CudaImpl<T>::Backward2D(std::complex<T>* flat_input)
     {
         cufftExecZ2Z(Dfti2DHandle_, (cuDoubleComplex*)flat_input, (cuDoubleComplex*)flat_input, CUFFT_INVERSE);
     }
+    FFTShift2D(flat_input, m_, n_, batch_);
     Normalization(flat_input, m_ * n_, m_ * n_ * batch_);
     return true;
 }
@@ -49,6 +53,7 @@ bool CudaImpl<T>::Backward2D(std::complex<T>* flat_input)
 template<typename T>
 bool CudaImpl<T>::Forward3D(std::complex<T>* flat_input)
 {
+    FFTShift3D(flat_input, m_, n_, l_, batch_);
     if constexpr (std::is_same_v<T, float>)
     {
         cufftExecC2C(Dfti3DHandle_, (cuComplex*)flat_input, (cuComplex*)flat_input, CUFFT_FORWARD);
@@ -57,12 +62,14 @@ bool CudaImpl<T>::Forward3D(std::complex<T>* flat_input)
     {
         cufftExecZ2Z(Dfti3DHandle_, (cuDoubleComplex*)flat_input, (cuDoubleComplex*)flat_input, CUFFT_FORWARD);
     }
+    FFTShift3D(flat_input, m_, n_, l_, batch_);
     return true;
 }
 
 template<typename T>
 bool CudaImpl<T>::Backward3D(std::complex<T>* flat_input)
 {
+    FFTShift3D(flat_input, m_, n_, l_, batch_);
     if constexpr (std::is_same_v<T, float>)
     {
         cufftExecC2C(Dfti3DHandle_, (cuComplex*)flat_input, (cuComplex*)flat_input, CUFFT_INVERSE);
@@ -72,6 +79,7 @@ bool CudaImpl<T>::Backward3D(std::complex<T>* flat_input)
         cufftExecZ2Z(Dfti3DHandle_, (cuDoubleComplex*)flat_input, (cuDoubleComplex*)flat_input, CUFFT_INVERSE);
     }
     Normalization(flat_input, m_ * n_ * l_, m_ * n_* l_ * batch_);
+    FFTShift3D(flat_input, m_, n_, l_, batch_);
     return true;
 }
 
@@ -192,12 +200,26 @@ bool CudaImpl<T>::Real2DTo3DInterpolation(T* flat_2d_src, T* flat_3d_dst, T* ang
 template<typename T>
 bool CudaImpl<T>::FFTShift2D(std::complex<T>* flat_input, size_t M, size_t N, size_t Batch)
 {
+    uint64_t num = M * N * Batch / 2;
+    uint64_t block_size = 256;
+    uint64_t per_thread_data = 8;
+    uint64_t per_block_data = block_size * per_thread_data;
+    uint64_t grid_size = (num + per_block_data - 1) / per_block_data;
+    Kernel::ker_FFTShift2D<T><<<grid_size, block_size, 0, stream_>>>
+    ((thrust::complex<T>*)flat_input, M, N, Batch);
     return true;
 }
 
 template<typename T>
 bool CudaImpl<T>::FFTShift3D(std::complex<T>* flat_input, size_t M, size_t N, size_t L, size_t Batch)
 {
+    uint64_t num = M * N * L * Batch / 2;
+    uint64_t block_size = 256;
+    uint64_t per_thread_data = 8;
+    uint64_t per_block_data = block_size * per_thread_data;
+    uint64_t grid_size = (num + per_block_data - 1) / per_block_data;
+    Kernel::ker_FFTShift3D<T><<<grid_size, block_size, 0, stream_>>>
+    ((thrust::complex<T>*)flat_input, M, N, L, Batch);
     return true;
 }
 

@@ -3,6 +3,8 @@
 #include <cooperative_groups.h>
 #include <cuda.h>
 #include <complex>
+#include <thrust/swap.h>
+
 namespace cg = cooperative_groups;
 
 namespace CPRA
@@ -116,6 +118,72 @@ __global__ void ker_NormRealInterpolation(T* flat_3d_dst, T* flat_weight, uint64
     }
 }
 
+
+template <typename T>
+__global__ void ker_FFTShift2D(thrust::complex<T>* flat_input, size_t M, size_t N, size_t batch_size)
+{
+    // Assume that M and N are even
+    for(uint64_t i = cg::this_grid().thread_rank(); i < (uint64_t)M * N * batch_size / 2; i+= cg::this_grid().size())
+    {
+        uint64_t bidx = i / ((uint64_t)M * N / 2);
+        uint64_t idx = i - bidx * M * N / 2;
+        size_t col = idx % N; // [0, N - 1]
+        size_t row = idx / N; // [0, M / 2 - 1]
+        uint64_t offset = bidx * M * N;
+        size_t crow = row + M / 2;
+        size_t ccol;
+        // which squard
+        if(col < N / 2)
+        {
+            // first quad to third quad
+            ccol = col + N / 2;  
+        }
+        else
+        {
+            // second quad to forth quard
+            ccol = col - N / 2;
+        }
+        thrust::swap(flat_input[crow * N + ccol + offset], flat_input[row * N + col + offset]);
+    }
+}
+
+template <typename T>
+__global__ void ker_FFTShift3D(thrust::complex<T>* flat_input, size_t M, size_t N, size_t L, size_t batch_size)
+{
+    // Assume that M, N, L are even
+    for(uint64_t i = cg::this_grid().thread_rank(); i < (uint64_t)M * N * L * batch_size / 2; i+= cg::this_grid().size())
+    {
+        uint64_t bidx = i / ((uint64_t)M * N * L / 2);
+        uint64_t idx = i - bidx * M * N * L / 2;
+        size_t  dep = idx / (M * N);
+        idx = idx - dep * M * N;
+        size_t col = idx % N;
+        size_t row = idx / N;
+        auto offset  = bidx * M * N * L;
+        size_t cdep = dep + L / 2;
+        size_t crow;
+        size_t ccol;
+
+        if(row < M / 2)
+        {
+            crow = row + M / 2;
+        }
+        else
+        {
+            crow = row - M / 2;
+        }
+
+        if(col < N / 2)
+        {
+            ccol = col + N / 2;
+        }
+        else
+        {
+            ccol = col - N / 2;
+        }
+        thrust::swap(flat_input[cdep * M * N + crow * N + ccol + offset], flat_input[dep * M * N + row * N + col + offset]);
+    }
+}
 
 
 }
