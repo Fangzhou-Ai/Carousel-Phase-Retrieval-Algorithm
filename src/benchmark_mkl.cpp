@@ -4,10 +4,10 @@
 #include "../include/CPRA.hpp"
 
 
-static constexpr uint64_t M  = 1024;
-static constexpr uint64_t N = 1024;
-static constexpr uint64_t P = 576;
-static constexpr uint64_t L = 1024;
+static constexpr uint64_t M  = 512;
+static constexpr uint64_t N = M;
+static constexpr uint64_t P = M * 9 / 16;
+static constexpr uint64_t L = M;
 static constexpr uint64_t BATCHSIZE_CPRA = 1;
 static constexpr uint64_t BATCHSIZE_CONV = 1;
 static constexpr float BETA = 0.9;
