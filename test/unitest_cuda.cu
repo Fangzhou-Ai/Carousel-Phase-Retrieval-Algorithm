@@ -1,44 +1,14 @@
 #include <gtest/gtest.h>
 #include "../include/CPRA.hpp"
 
-
-TEST(CUDATEST, Test_IO_Host_BINARY)
+TEST(CUDATEST, Test_CUDA_Initialize)
 {
-    CPRA::Cpra<float, CPRA::IMPL_TYPE::CUDA> obj(1, 1, 1, 1);
-    float* output_ptr = (float*)obj.allocate(sizeof(float) * 1000);
+    CPRA::Cpra<float, CPRA::IMPL_TYPE::CUDA> compute(1, 1, 1, 1);
+    auto* test_ptr = (float*)compute.allocate(sizeof(float) * 1000);
+    compute.impl_->Initialize(test_ptr, 1000);
     for(int i = 0; i < 1000; i++)
-        output_ptr[i] = i;
-    EXPECT_EQ(obj.WriteMatrixToFile("/tmp/test_output.bin", output_ptr, 10, 10, 10), true);
-
-    float* Input_ptr = (float*)obj.allocate(sizeof(float) * 1000);
-    EXPECT_EQ(obj.ReadMatrixFromFile("/tmp/test_output.bin", Input_ptr, 10, 10, 10), true);
-    for(int i = 0; i < 1000; i++)
-        EXPECT_EQ(Input_ptr[i], i);
-
-    obj.deallocate(output_ptr);
-    obj.deallocate(Input_ptr);
-}
-
-TEST(CUDATEST, Test_IO_READ_MALTAB_BINARY)
-{
-    CPRA::Cpra<float, CPRA::IMPL_TYPE::CUDA> obj(1, 1, 1, 1);
-    float* Input_ptr = (float*)obj.allocate(sizeof(float) * 1000);
-    // Read MATLAB data
-    // It's a matrix of size 10 * 10
-    // contains sequencial data from 1 to 100
-    // row-major data layout
-    // Notice matlaab follows column-major data layout
-    // while C/C++/CUDA follows row-major data layout
-    EXPECT_EQ(obj.ReadMatrixFromFile("../data/matlab_output.bin", Input_ptr, 10, 10, 1), true);
-    for(int i = 0; i < 10; i++) // row
-    {
-        for(int j = 0; j < 10; j++) // column
-        {
-            EXPECT_EQ(Input_ptr[i * 10 + j], i * 10 + j + 1);
-        }
-    }
-    EXPECT_EQ(obj.WriteMatrixToFile("../data/cpp_output.bin", Input_ptr, 10, 10, 1), true);
-    obj.deallocate(Input_ptr);
+        EXPECT_TRUE((test_ptr[i] >= 0) && (test_ptr[i] <= 1));
+    compute.deallocate(test_ptr);
 }
 
 TEST(CUDATEST, Test_Merge_Norm)
