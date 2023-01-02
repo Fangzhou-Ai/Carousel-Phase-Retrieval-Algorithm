@@ -53,7 +53,7 @@ TEST(MKLTEST, Test_2D_DFT)
     {
         for(int j = 0; j < 10; j++)
         {
-            if(i == 0 && j == 0)EXPECT_NEAR(input[i * 10 + j].real(), 100, 1e-14);
+            if(i == 5 && j == 5)EXPECT_NEAR(input[i * 10 + j].real(), 100, 1e-14);
             else EXPECT_NEAR(input[i * 10 + j].real(), 0, 1e-14);
             EXPECT_NEAR(input[i * 10 + j].imag(), 0, 1e-14);
         }
