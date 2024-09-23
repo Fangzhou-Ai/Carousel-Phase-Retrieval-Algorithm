@@ -7,6 +7,9 @@ Carousel Phase Retrieval Algorithm (CPRA)
 - To build MKL version, please install Intel oneAPI toolkit, old Intel MKL toolkit can't be found by Cmake automatically (Can be added manually in CmakeLists.txt)
 - Boost
 
+# Docker
+- We offer a docker image that meet all system requirements we mentioned above, to download the image, please `docker pull ucsdcem/carousel-phase-retrieval-algorithm:11.8.0_2024.1-HPC_Boost-1.84.0_Devel_Ubuntu-20.04`
+
 # Building instructions
 - Don't build CUDA and MKL version together, because NVCC can't link MKL.
 
