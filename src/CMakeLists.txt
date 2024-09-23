@@ -91,4 +91,37 @@ if(HAS_MKL)
                             mkl_core
                             mkl_gnu_thread
                         )
+    add_executable(
+        CONV_MKL
+        CONV_MKL.cpp
+        )
+    if(HAS_OMP)
+        target_link_libraries(CONV_MKL PRIVATE OpenMP::OpenMP_CXX_LIBRARIES)
+    endif()
+    target_include_directories(CONV_MKL PRIVATE "${MKLROOT}/include")
+    target_link_directories(CONV_MKL PRIVATE "${MKLROOT}/lib/intel64")
+    target_link_libraries(CONV_MKL
+                            PRIVATE
+                            mkl_intel_lp64
+                            mkl_core
+                            mkl_gnu_thread
+                            ${Boost_LIBRARIES}
+                        )
+
+    add_executable(
+        CPRA_MKL
+        CPRA_MKL.cpp
+        )
+    if(HAS_OMP)
+        target_link_libraries(CPRA_MKL PRIVATE OpenMP::OpenMP_CXX_LIBRARIES)
+    endif()
+    target_include_directories(CPRA_MKL PRIVATE "${MKLROOT}/include")
+    target_link_directories(CPRA_MKL PRIVATE "${MKLROOT}/lib/intel64")
+    target_link_libraries(CPRA_MKL
+                            PRIVATE
+                            mkl_intel_lp64
+                            mkl_core
+                            mkl_gnu_thread
+                            ${Boost_LIBRARIES}
+                        )
 endif()
